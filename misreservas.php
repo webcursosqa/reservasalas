@@ -131,7 +131,6 @@ if($action == 'confirmar'){
 	$hora=date('H:i');
 	//$o.= "Hora Actual:".$hora."<br>";
 	$o.=$OUTPUT->single_button('reservar.php', get_string('newbook', 'local_reservasalas')).'<br>'; //imprime link volver.
-	//$o.= "me falta el c��digo para confirmar y cancelar, arreglar formato fechas en todo el c��digo";
 	
 	$o.= "<br><p style=\"font-family:arial;color:red;\">".get_string('notes', 'local_reservasalas')."<br>
 	- ".get_string('inordertoregister', 'local_reservasalas').$OUTPUT->pix_icon('i/valid', get_string('confirm', 'local_reservasalas')).get_string('whichisvisible', 'local_reservasalas')."<br>

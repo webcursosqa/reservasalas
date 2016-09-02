@@ -130,5 +130,10 @@ if ($form_buscar->is_cancelled()) {
 		<?php 
 }
 
+$messageconfirm = "<br><p style=\"font-family:arial;color:red;\">".get_string('notes', 'local_reservasalas')."<br>
+	- ".get_string('confirmmessage', 'local_reservasalas').$OUTPUT->pix_icon('i/valid', get_string('confirm', 'local_reservasalas')).get_string('visibleicon', 'local_reservasalas')."<br>
+	- ".get_string('unabletoattend', 'local_reservasalas')." </p>";
+
+echo $messageconfirm;
 
 echo $OUTPUT->footer (); 

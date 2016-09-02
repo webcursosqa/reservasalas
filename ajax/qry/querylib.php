@@ -194,6 +194,10 @@ function reservasalas_sendMail($values, $error, $user, $asistentes, $eventname, 
 				. get_string("room", "local_reservasalas") . ": " . $value["nombresala"] . " - " 
 				. get_string("module", "local_reservasalas") . ": " . $value["nombremodulo"] . "\n";
 	}
+	$messageconfirm = "<br><p style=\"font-family:arial;color:red;\">".get_string('notes', 'local_reservasalas')."<br>
+	- ".get_string('confirmmessage', 'local_reservasalas').$OUTPUT->pix_icon('i/valid', get_string('confirm', 'local_reservasalas')).get_string('visibleicon', 'local_reservasalas')."<br>
+	- ".get_string('unabletoattend', 'local_reservasalas')." </p>";
+	$message.=$messageconfirm;
 	// Format each "\n" into a line break
 	$formattedMessage = nl2br($message);
 	

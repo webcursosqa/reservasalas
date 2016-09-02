@@ -320,6 +320,8 @@ $string['noblock'] = 'The user is not block.';
 $string['noexist'] = 'The user dont exist.';
 $string['swap'] = 'swap.';
 $string['empty'] = 'Is needed to fill the email field';
+$string['confirmmessage'] = 'In order to register you must go to <a href="misreservas.php">My bookings</a>.<br>- You must click on the icon ';
+$string['visibleicon'] = ' which is visible from 5 minutes before and 15 minutes after the start of the module.';
 
 
 ?>

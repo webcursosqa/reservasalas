@@ -321,6 +321,7 @@ $string['noblock'] = 'El usuario no esta bloqueado.';
 $string['noexist'] ='El usuario ingresado no existe.';
 $string['swap'] = 'intercambiar.';
 $string['empty'] = 'Es necesario rellenar el campo email.';
-
+$string['confirmmessage'] = 'Para confirmar debes ingresar a <a href="misreservas.php">Mis reservas</a>.<br>- Debes hacer click en el icono ';
+$string['visibleicon'] = ' que estará visible desde 5 minutos antes y hasta 15 minutos después del comienzo del módulo.';
 
 ?>
