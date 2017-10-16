@@ -62,53 +62,81 @@ $time=time();
 
 echo "\nStarting at ".date("F j, Y, G:i:s")."\n";
 
-
 $fechahoy = date ( 'Y-m-d' );
-$horahoy = date ( 'H' ).'%';
 
-$sql="	Select rr.id as id, rr.alumno_id as userid
-			FROM mdl_reservasalas_reservas AS rr
-			INNER JOIN mdl_reservasalas_salas AS rs ON (rr.salas_id = rs.id AND rs.tipo = 2)
-			INNER JOIN mdl_reservasalas_edificios AS re ON (re.id = rs.edificios_id)
-			INNER JOIN mdl_reservasalas_modulos AS rm ON (rm.edificio_id = re.id)
-			WHERE rr.modulo = rm.id AND rm.hora_inicio like '$horahoy' AND rr.fecha_reserva ='$fechahoy' AND rr.confirmado=0
-";
-$result=$DB->get_records_sql($sql);
+/*$sql="	Select rr.id as id, rr.alumno_id as userid
+		FROM mdl_reservasalas_reservas AS rr
+		INNER JOIN mdl_reservasalas_salas AS rs ON (rr.salas_id = rs.id AND rs.tipo = 2)
+		INNER JOIN mdl_reservasalas_edificios AS re ON (re.id = rs.edificios_id)
+		INNER JOIN mdl_reservasalas_modulos AS rm ON (rm.edificio_id = re.id)
+		WHERE rr.modulo = rm.id AND rm.hora_inicio like '$horahoy' AND rr.fecha_reserva ='$fechahoy' AND rr.confirmado=0 ";
+*/
+/*  PARAMETROS
+ 	2 -> tipo sala:estudio,
+	time() -> unix ahora,
+	strtotime($fechahoy) -> unix hoy a las 00:00
+	0 -> reserva no confirmada
+	1 -> reserva activa
+*/
+$sqlparam = array(
+		2,
+		time(),
+		strtotime($fechahoy),
+		0,
+		1
+);
+$sql = "SELECT rr.id AS id, rr.alumno_id as userid  
+		FROM mdl_reservasalas_reservas AS rr 
+		INNER JOIN mdl_reservasalas_salas AS rs ON (rr.salas_id = rs.id AND rs.tipo = 2)
+		INNER JOIN mdl_reservasalas_edificios AS re ON (re.id = rs.edificios_id)
+		INNER JOIN mdl_reservasalas_modulos AS rm ON (rm.edificio_id = re.id)
+		WHERE UNIX_TIMESTAMP(CONCAT(rr.fecha_reserva,' ',rm.hora_inicio)) < ? 
+		AND UNIX_TIMESTAMP(CONCAT(rr.fecha_reserva,' ',rm.hora_inicio)) > ?
+		AND rr.confirmado = 0 
+		AND rr.activa = 1";
+$result=$DB->get_records_sql($sql, $sqlparam);
+
 $i=0;
 foreach($result as $data){
 	
 	$userid=$data->userid;
-	$idreserva=$data->id;
 	if(!$DB->get_record('reservasalas_bloqueados',array('alumno_id'=>$userid,'estado'=>1) )){
 		
 		$record = new stdClass ();
 		$record->fecha_bloqueo = $fechahoy;
-		$record->id_reserva = $idreserva;
+		$record->id_reserva = $data->id;
 		$record->estado = 1;
 		$record->comentarios = "bloqueado automático por no confirmar";
 		$record->alumno_id = $userid;
 		$DB->insert_record ( 'reservasalas_bloqueados', $record );
-	$i++;
+		
+		$i++;
 	}	
 }
+
 echo "\n".$i." students blocked\n";
 echo "\n ok \n";
 echo "Unlocking students\n";
-$fecha=date('Y-m-d', strtotime("- 3 days"));
-$sql="Select * from {reservasalas_bloqueados} where estado=? AND fecha_bloqueo=?";
-$info=$DB->get_records_sql($sql,array('1',$fecha));
+
+$fecha=time() - (3 * 24 * 60 * 60);
+
+$sql="SELECT * FROM {reservasalas_bloqueados} WHERE estado = ? AND UNIX_TIMESTAMP(fecha_bloqueo) < ?";
+$info = $DB->get_records_sql($sql,array('1',$fecha));
+
 $k=0;
 foreach($info as $data){
 	
 	$data->estado=0;
 	$DB->update_record('reservasalas_bloqueados',$data);
-$k++;
+	$k++;
 }
+
 echo "\n".$k." students unlocked \n";
 echo "ok\n";
+
 $timenow=time();
 $execute=$time - $timenow;
-echo "\nExecute time ".$execute." sec\n";	
 
+echo "\nExecute time ".$execute." sec\n";	
 
 exit(0); // 0 means success
