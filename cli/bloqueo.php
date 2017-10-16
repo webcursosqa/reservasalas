@@ -110,6 +110,7 @@ foreach($result as $data){
 		$record->alumno_id = $userid;
 		$DB->insert_record ( 'reservasalas_bloqueados', $record );
 		
+		echo "student:".$userid." blocked \n";
 		$i++;
 	}	
 }
@@ -128,6 +129,7 @@ foreach($info as $data){
 	
 	$data->estado=0;
 	$DB->update_record('reservasalas_bloqueados',$data);
+	echo "student:".$data->alumno_id." unblocked \n";
 	$k++;
 }
 
