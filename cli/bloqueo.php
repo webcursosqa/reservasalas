@@ -82,8 +82,7 @@ $sqlparam = array(
 		2,
 		time(),
 		strtotime($fechahoy),
-		0,
-		1
+		0
 );
 $sql = "SELECT rr.id AS id, rr.alumno_id as userid  
 		FROM mdl_reservasalas_reservas AS rr 
