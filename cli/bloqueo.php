@@ -98,6 +98,7 @@ $i=0;
 foreach($result as $data){
 	
 	$userid=$data->userid;
+	echo "blocking sutdent:".$userid;
 	if(!$DB->get_record('reservasalas_bloqueados',array('alumno_id'=>$userid,'estado'=>1) )){
 		
 		$record = new stdClass ();
@@ -110,7 +111,9 @@ foreach($result as $data){
 		
 		echo "student:".$userid." blocked \n";
 		$i++;
-	}	
+	}else{
+		echo "student:".$userid." already blocked";
+	}
 }
 
 echo "\n".$i." students blocked\n";
