@@ -92,8 +92,7 @@ $sql = "SELECT rr.id AS id, rr.alumno_id as userid
 		INNER JOIN mdl_reservasalas_modulos AS rm ON (rm.edificio_id = re.id)
 		WHERE UNIX_TIMESTAMP(CONCAT(rr.fecha_reserva,' ',rm.hora_inicio)) < ? 
 		AND UNIX_TIMESTAMP(CONCAT(rr.fecha_reserva,' ',rm.hora_inicio)) > ?
-		AND rr.confirmado = 0 
-		AND rr.activa = 1";
+		AND rr.confirmado = 0";
 $result=$DB->get_records_sql($sql, $sqlparam);
 
 $i=0;
