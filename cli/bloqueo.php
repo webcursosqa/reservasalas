@@ -70,7 +70,7 @@ $sql="	Select rr.id as id, rr.alumno_id as userid
 		INNER JOIN mdl_reservasalas_salas AS rs ON (rr.salas_id = rs.id AND rs.tipo = 2)
 		INNER JOIN mdl_reservasalas_edificios AS re ON (re.id = rs.edificios_id)
 		INNER JOIN mdl_reservasalas_modulos AS rm ON (rm.edificio_id = re.id)
-		WHERE rm.hora_inicio < ? AND rr.fecha_reserva = ? AND rr.confirmado=0 ";
+		WHERE rm.hora_inicio < ? AND rr.fecha_reserva = ? AND rr.confirmado=0 GROUP BY rr.alumno_id";
 
 /*  PARAMETROS
  	2 -> tipo sala:estudio,
@@ -97,7 +97,7 @@ $i=0;
 foreach($result as $data){
 	
 	$userid=$data->userid;
-	echo "blocking sutdent:".$userid;
+	echo "blocking sutdent:".$userid." \n";
 	if(!$DB->get_record('reservasalas_bloqueados',array('alumno_id'=>$userid,'estado'=>1) )){
 		
 		$record = new stdClass ();
@@ -111,7 +111,7 @@ foreach($result as $data){
 		echo "student:".$userid." blocked \n";
 		$i++;
 	}else{
-		echo "student:".$userid." already blocked";
+		echo "student:".$userid." already blocked \n";
 	}
 }
 
@@ -121,7 +121,7 @@ echo "Unlocking students\n";
 
 $fecha=time() - (3 * 24 * 60 * 60);
 
-$sql="SELECT * FROM {reservasalas_bloqueados} WHERE estado = ? AND UNIX_TIMESTAMP(fecha_bloqueo) < ?";
+$sql="SELECT * FROM {reservasalas_bloqueados} WHERE estado = ? AND fecha_bloqueo < ?";
 $info = $DB->get_records_sql($sql,array('1',$fecha));
 
 $k=0;
