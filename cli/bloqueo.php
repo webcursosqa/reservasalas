@@ -67,10 +67,10 @@ echo "fecha hoy: $fechahoy \n";
 $hora = date ('H:i');
 echo "hora actual: $hora \n";
 $sql="	Select rr.id as id, rr.alumno_id as userid
-		FROM mdl_reservasalas_reservas AS rr
-		INNER JOIN mdl_reservasalas_salas AS rs ON (rr.salas_id = rs.id AND rs.tipo = 2)
-		INNER JOIN mdl_reservasalas_edificios AS re ON (re.id = rs.edificios_id)
-		INNER JOIN mdl_reservasalas_modulos AS rm ON (rm.edificio_id = re.id)
+		FROM {reservasalas_reservas} AS rr
+		INNER JOIN {reservasalas_salas} AS rs ON (rr.salas_id = rs.id AND rs.tipo = 2)
+		INNER JOIN {reservasalas_edificios} AS re ON (re.id = rs.edificios_id)
+		INNER JOIN {reservasalas_modulos} AS rm ON (rm.edificio_id = re.id)
 		WHERE rm.hora_inicio < ? AND rr.fecha_reserva = ? AND rr.confirmado=0 GROUP BY rr.alumno_id";
 
 /*  PARAMETROS
@@ -124,9 +124,9 @@ echo "\n".$i." students blocked\n";
 echo "\n ok \n";
 echo "Unlocking students\n";
 
-$fecha= date('Y-m-d', strtotime("-3 days"));
+$fecha= time() - (3 * 24 * 60 * 60);
 echo "Fecha desbloqueo: $fecha \n";
-$sql="SELECT * FROM {reservasalas_bloqueados} WHERE estado = ? AND fecha_bloqueo < ?";
+$sql="SELECT * FROM {reservasalas_bloqueados} WHERE estado = ? AND UNIX_TIMESTAMP(fecha_bloqueo) < ?";
 $info = $DB->get_records_sql($sql,array('1',$fecha));
 
 $k=0;
