@@ -63,14 +63,15 @@ $time=time();
 echo "\nStarting at ".date("F j, Y, G:i:s")."\n";
 
 $fechahoy = date ( 'Y-m-d' );
-
-/*$sql="	Select rr.id as id, rr.alumno_id as userid
+$hora = date ('H:i');
+echo $hora;
+$sql="	Select rr.id as id, rr.alumno_id as userid
 		FROM mdl_reservasalas_reservas AS rr
 		INNER JOIN mdl_reservasalas_salas AS rs ON (rr.salas_id = rs.id AND rs.tipo = 2)
 		INNER JOIN mdl_reservasalas_edificios AS re ON (re.id = rs.edificios_id)
 		INNER JOIN mdl_reservasalas_modulos AS rm ON (rm.edificio_id = re.id)
-		WHERE rr.modulo = rm.id AND rm.hora_inicio like '$horahoy' AND rr.fecha_reserva ='$fechahoy' AND rr.confirmado=0 ";
-*/
+		WHERE rm.hora_inicio < ? AND rr.fecha_reserva = ? AND rr.confirmado=0 ";
+
 /*  PARAMETROS
  	2 -> tipo sala:estudio,
 	time() -> unix ahora,
@@ -79,19 +80,17 @@ $fechahoy = date ( 'Y-m-d' );
 	1 -> reserva activa
 */
 $sqlparam = array(
-		2,
-		time(),
-		strtotime($fechahoy),
-		0
+		$hora,
+		$fechahoy
 );
-$sql = "SELECT rr.id AS id, rr.alumno_id as userid  
+/*$sql = "SELECT rr.id AS id, rr.alumno_id as userid  
 		FROM mdl_reservasalas_reservas AS rr 
 		INNER JOIN mdl_reservasalas_salas AS rs ON (rr.salas_id = rs.id AND rs.tipo = 2)
 		INNER JOIN mdl_reservasalas_edificios AS re ON (re.id = rs.edificios_id)
 		INNER JOIN mdl_reservasalas_modulos AS rm ON (rm.edificio_id = re.id)
 		WHERE UNIX_TIMESTAMP(CONCAT(rr.fecha_reserva,' ',rm.hora_inicio)) < ? 
 		AND UNIX_TIMESTAMP(CONCAT(rr.fecha_reserva,' ',rm.hora_inicio)) > ?
-		AND rr.confirmado = 0";
+		AND rr.confirmado = 0";*/
 $result=$DB->get_records_sql($sql, $sqlparam);
 
 $i=0;
