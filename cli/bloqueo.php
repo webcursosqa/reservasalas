@@ -63,8 +63,9 @@ $time=time();
 echo "\nStarting at ".date("F j, Y, G:i:s")."\n";
 
 $fechahoy = date ( 'Y-m-d' );
+echo "fecha hoy: $fechahoy \n";
 $hora = date ('H:i');
-echo $hora;
+echo "hora actual: $hora \n";
 $sql="	Select rr.id as id, rr.alumno_id as userid
 		FROM mdl_reservasalas_reservas AS rr
 		INNER JOIN mdl_reservasalas_salas AS rs ON (rr.salas_id = rs.id AND rs.tipo = 2)
@@ -98,8 +99,14 @@ foreach($result as $data){
 	
 	$userid=$data->userid;
 	echo "blocking sutdent:".$userid." \n";
-	if(!$DB->get_record('reservasalas_bloqueados',array('alumno_id'=>$userid,'estado'=>1) )){
+	if($bloqueado = $DB->get_record('reservasalas_bloqueados',array('alumno_id'=>$userid,'estado'=>1) )){
 		
+		$bloqueado->estado=0;
+		$DB->update_record('reservasalas_bloqueados', $bloqueado);
+		
+		echo "student:".$userid." blocked \n";
+		$i++;
+	}else{
 		$record = new stdClass ();
 		$record->fecha_bloqueo = $fechahoy;
 		$record->id_reserva = $data->id;
@@ -110,8 +117,6 @@ foreach($result as $data){
 		
 		echo "student:".$userid." blocked \n";
 		$i++;
-	}else{
-		echo "student:".$userid." already blocked \n";
 	}
 }
 
@@ -119,8 +124,8 @@ echo "\n".$i." students blocked\n";
 echo "\n ok \n";
 echo "Unlocking students\n";
 
-$fecha=time() - (3 * 24 * 60 * 60);
-
+$fecha= date('Y-m-d', strtotime("-3 days"));
+echo "Fecha desbloqueo: $fecha \n";
 $sql="SELECT * FROM {reservasalas_bloqueados} WHERE estado = ? AND fecha_bloqueo < ?";
 $info = $DB->get_records_sql($sql,array('1',$fecha));
 
@@ -137,7 +142,7 @@ echo "\n".$k." students unlocked \n";
 echo "ok\n";
 
 $timenow=time();
-$execute=$time - $timenow;
+$execute=$timenow - $time;
 
 echo "\nExecute time ".$execute." sec\n";	
 
