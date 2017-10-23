@@ -84,14 +84,7 @@ $sqlparam = array(
 		$hora,
 		$fechahoy
 );
-/*$sql = "SELECT rr.id AS id, rr.alumno_id as userid  
-		FROM mdl_reservasalas_reservas AS rr 
-		INNER JOIN mdl_reservasalas_salas AS rs ON (rr.salas_id = rs.id AND rs.tipo = 2)
-		INNER JOIN mdl_reservasalas_edificios AS re ON (re.id = rs.edificios_id)
-		INNER JOIN mdl_reservasalas_modulos AS rm ON (rm.edificio_id = re.id)
-		WHERE UNIX_TIMESTAMP(CONCAT(rr.fecha_reserva,' ',rm.hora_inicio)) < ? 
-		AND UNIX_TIMESTAMP(CONCAT(rr.fecha_reserva,' ',rm.hora_inicio)) > ?
-		AND rr.confirmado = 0";*/
+
 $result=$DB->get_records_sql($sql, $sqlparam);
 
 $i=0;
@@ -99,13 +92,22 @@ foreach($result as $data){
 	
 	$userid=$data->userid;
 	echo "blocking sutdent:".$userid." \n";
-	if($bloqueado = $DB->get_record('reservasalas_bloqueados',array('alumno_id'=>$userid,'estado'=>1) )){
+	
+	$bloqueostudentparam= array(
+			$fechahoy,
+			$userid
+	);
+	
+	$bloqueostudent = "SELECT * from mdl_reservasalas_bloqueados WHERE fecha_bloqueo = ? AND alumno_id = ?";
+	if($bloqueado = $DB->get_record_sql($bloqueostudent,$bloqueostudentparam)){
 		
-		$bloqueado->estado=0;
-		$DB->update_record('reservasalas_bloqueados', $bloqueado);
-		
-		echo "student:".$userid." blocked \n";
-		$i++;
+		if($bloqueado->estado == 0){
+			$bloqueado->estado = 1;
+			$DB->update_record('reservasalas_bloqueados', $bloqueado);
+			
+			echo "student:".$userid." blocked \n";
+			$i++;
+		}
 	}else{
 		$record = new stdClass ();
 		$record->fecha_bloqueo = $fechahoy;
