@@ -63,9 +63,7 @@ $time=time();
 echo "\nStarting at ".date("F j, Y, G:i:s")."\n";
 
 $fechahoy = date ( 'Y-m-d' );
-echo "fecha hoy: $fechahoy \n";
 $hora = date ('H:i');
-echo "hora actual: $hora \n";
 $sql="	Select rr.id as id, rr.alumno_id as userid
 		FROM {reservasalas_reservas} AS rr
 		INNER JOIN {reservasalas_salas} AS rs ON (rr.salas_id = rs.id AND rs.tipo = 2)
@@ -73,13 +71,6 @@ $sql="	Select rr.id as id, rr.alumno_id as userid
 		INNER JOIN {reservasalas_modulos} AS rm ON (rm.edificio_id = re.id)
 		WHERE rm.hora_inicio < ? AND rr.fecha_reserva = ? AND rr.confirmado=0 GROUP BY rr.alumno_id";
 
-/*  PARAMETROS
- 	2 -> tipo sala:estudio,
-	time() -> unix ahora,
-	strtotime($fechahoy) -> unix hoy a las 00:00
-	0 -> reserva no confirmada
-	1 -> reserva activa
-*/
 $sqlparam = array(
 		$hora,
 		$fechahoy
@@ -91,10 +82,6 @@ $i=0;
 foreach($result as $data){
 	
 	echo "blocking sutdent:".$data->userid." \n";
-	
-
-	
-	
 	if($bloqueado = $DB->get_record('reservasalas_bloqueados',array('alumno_id'=>$data->userid,'fecha_bloqueo'=>$fechahoy))){
 		if($bloqueado->estado == 0){
 			$bloqueado->estado = 1;
@@ -102,6 +89,8 @@ foreach($result as $data){
 			
 			echo "student:".$data->userid." blocked \n";
 			$i++;
+		}else{
+			echo "student:".$data->userid." already blocked \n";
 		}
 	}else{
 		$record = new stdClass ();
@@ -122,7 +111,6 @@ echo "\n ok \n";
 echo "Unlocking students\n";
 
 $fecha= time() - (3 * 24 * 60 * 60);
-echo "Fecha desbloqueo: $fecha \n";
 $sql="SELECT * FROM {reservasalas_bloqueados} WHERE estado = ? AND UNIX_TIMESTAMP(fecha_bloqueo) < ?";
 $info = $DB->get_records_sql($sql,array('1',$fecha));
 
