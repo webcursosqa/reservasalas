@@ -90,22 +90,17 @@ $result=$DB->get_records_sql($sql, $sqlparam);
 $i=0;
 foreach($result as $data){
 	
-	$userid=$data->userid;
-	echo "blocking sutdent:".$userid." \n";
+	echo "blocking sutdent:".$data->userid." \n";
 	
-	$bloqueostudentparam= array(
-			$fechahoy,
-			$userid
-	);
+
 	
-	$bloqueostudent = "SELECT * from mdl_reservasalas_bloqueados WHERE fecha_bloqueo = ? AND alumno_id = ?";
-	if($bloqueado = $DB->get_record_sql($bloqueostudent,$bloqueostudentparam)){
-		
+	
+	if($bloqueado = $DB->get_record('reservasalas_bloqueados',array('alumno_id'=>$data->userid,'fecha_bloqueo'=>$fechahoy))){
 		if($bloqueado->estado == 0){
 			$bloqueado->estado = 1;
 			$DB->update_record('reservasalas_bloqueados', $bloqueado);
 			
-			echo "student:".$userid." blocked \n";
+			echo "student:".$data->userid." blocked \n";
 			$i++;
 		}
 	}else{
@@ -114,10 +109,10 @@ foreach($result as $data){
 		$record->id_reserva = $data->id;
 		$record->estado = 1;
 		$record->comentarios = "bloqueado automático por no confirmar";
-		$record->alumno_id = $userid;
+		$record->alumno_id = $data->userid;
 		$DB->insert_record ( 'reservasalas_bloqueados', $record );
 		
-		echo "student:".$userid." blocked \n";
+		echo "student:".$data->userid." blocked \n";
 		$i++;
 	}
 }
