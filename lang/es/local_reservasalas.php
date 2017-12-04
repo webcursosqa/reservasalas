@@ -323,5 +323,21 @@ $string['swap'] = 'intercambiar.';
 $string['empty'] = 'Es necesario rellenar el campo email.';
 $string['confirmmessage'] = 'Para confirmar debes ingresar a <a href="misreservas.php">Mis reservas</a>.<br>- Debes hacer click en el icono ';
 $string['visibleicon'] = ' que estará visible desde 5 minutos antes y hasta 15 minutos después del comienzo del módulo.';
+$string["close"] = "Cerrar";
+$string['rules'] = 'Reglas';
+$string["rules_title"] = "Normas Salas de Estudio";
+$string["rules_content"] = 'Estimados estudiantes las normas de las salas de estudio son las siguientes:<br>
+	* La reserva de salas de estudio debe ser realizada exclusivamente por el alumno a través de Webcursos.<br>
+	* Puede reservar hasta con una semana de anticipación.<br>
+	* <b>Confirma tu asistencia</b> desde la opción <b>"mis reservas"</b>, para ello dispones de 20 minutos.<br>
+	 Si no validas tu llegada a la sala, la reserva se anulará automáticamente.<br>
+	* Puedes reservar 2 módulos al día y 6 módulos a la semana.<br>
+	* Puedes cancelar tu reserva hasta 1 hora antes.<br>
+	* Si no asistes y tampoco cancelas, quedarás bloqueado durante 3 días hábiles.<br>
+	* Las salas de estudio son grupales, con un minimo de <b>2 personas y un máximo de 6</b>.<br>
+	* Por favor mantener los celulares silenciados y un volumen moderado de conversación.<br>
+	* El computador de la sala de estudio es para ser utilizado con fines académicos.<br>
+	* Bienvenidos los <b>Snack & Café</b>. No está permitido ingresar con alimentos como frituras, hot dogs,<br>
+	 almuerzos, ensaladas, etc. Para eso los invitamos a utilizar el casino.';
 
 ?>

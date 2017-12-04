@@ -117,3 +117,22 @@ function booking_availability($date){
 	}
 	return $books;
 }
+
+function reservasalas_modal_rules() {
+	return '<div id="myModal" class="modal fade" role="dialog" style="width: 70%; margin-left: -35%; display:none;">
+  				<div class="modal-dialog">
+				    <div class="modal-content">
+      					<div class="modal-header">
+        					<button type="button" class="close" data-dismiss="modal">&times;</button>
+        					<h4 class="modal-title">'.get_string("rules_title", "local_reservasalas").'</h4>
+      					</div>
+      					<div class="modal-body">
+        					<p>'.get_string("rules_content", "local_reservasalas").'</p>
+      					</div>
+      					<div class="modal-footer">
+	        				<button type="button" class="btn btn-default" data-dismiss="modal">'.get_string("close", "local_reservasalas").'</button>
+    	  				</div>
+    				</div>
+  				</div>
+			</div>';
+}

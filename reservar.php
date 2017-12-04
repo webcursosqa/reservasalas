@@ -46,7 +46,9 @@ $PAGE->navbar->add ( get_string ( 'reserverooms', 'local_reservasalas' ), 'reser
 echo $OUTPUT->header (); 
 echo $OUTPUT->heading ( get_string ( 'reserveroom', 'local_reservasalas' ) );
 
-
+//Rules modal for reservasalas
+echo html_writer::nonempty_tag("button", html_writer::tag('h6', get_string("rules","local_reservasalas")), array( "id"=>"button", "class" => "btn-warning", "data-toggle" => "modal", "data-target" => "#myModal"));
+$modal = reservasalas_modal_rules();
 $form_buscar = new formBuscarSalas();
 
 echo $form_buscar->display ();
@@ -137,3 +139,19 @@ $messageconfirm = "<br><p style=\"font-family:arial;color:red;\">".get_string('n
 echo $messageconfirm;
 
 echo $OUTPUT->footer (); 
+echo html_writer::div($modal, "modaldiv");
+
+?>
+<script type="text/javascript">
+	$( document ).on( "click", ".modal-backdrop", function() {
+		jQuery('.modal').modal('hide');
+	});
+		$( document ).on( "click", "#button", function() {
+		jQuery('#myModal').css('z-index', '10').modal('show');
+	});
+</script>
+<script type="text/javascript">
+	$(document).ready(function () {
+		$("rect").attr("fill", "transparent");
+	});
+</script>

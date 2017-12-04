@@ -322,6 +322,21 @@ $string['swap'] = 'swap.';
 $string['empty'] = 'Is needed to fill the email field';
 $string['confirmmessage'] = 'In order to register you must go to <a href="misreservas.php">My bookings</a>.<br>- You must click on the icon ';
 $string['visibleicon'] = ' which is visible from 5 minutes before and 15 minutes after the start of the module.';
-
+$string["close"] = "Close";
+$string['rules'] = 'Rules';
+$string["rules_title"] = "Study room rules";
+$string["rules_content"] = 'Dear students, the rules of study rooms are the following:<br>
+	* The reservation of study rooms must be made exclusively by the student through Websites.<br>
+	* You can book up to a week in advance.<br>
+	* <b>Confirm your assistance</b> from the <b>"my reservations"</b> option, for which you have 20 minutes.<br>
+	  If you do not validate your arrival in the room, the reservation will be canceled automatically.<br>
+	* You can reserve 2 modules per day and 6 modules per week.<br>
+	* You can cancel your reservation up to 1 hour before.<br>
+	* If you do not attend and do not cancel, you will be blocked for 3 business days.<br>
+	* The study rooms are group, with a minimum of <b> 2 people and a maximum of 6 </b>.<br>
+	* Please keep cell phones muted and a moderate volume of conversation.<br>
+	* The computer in the study room is to be used for academic purposes. <br>
+	* Welcome to the <b> Snack & Café </b>. It is not allowed to enter with foods such as chips, hot dogs, <br>
+	  lunches, salads, etc. For that we invite you to use the casino. ';
 
 ?>
