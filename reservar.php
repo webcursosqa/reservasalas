@@ -47,7 +47,7 @@ echo $OUTPUT->header ();
 echo $OUTPUT->heading ( get_string ( 'reserveroom', 'local_reservasalas' ) );
 
 //Rules modal for reservasalas
-echo html_writer::nonempty_tag("button", html_writer::tag('h6', get_string("rules","local_reservasalas")), array( "id"=>"button", "class" => "btn-info", "data-toggle" => "modal", "data-target" => "#myModal"));
+echo html_writer::nonempty_tag("button", html_writer::tag('h6', get_string("rules","local_reservasalas")), array( "id"=>"button", "class" => "btn", "data-toggle" => "modal", "data-target" => "#myModal"));
 $modal = reservasalas_modal_rules();
 
 $form_buscar = new formBuscarSalas();
