@@ -119,7 +119,7 @@ function booking_availability($date){
 }
 
 function reservasalas_modal_rules() {
-	return '<div id="myModal" class="modal fade" role="dialog" style="width: 70%; margin-left: -35%; display:none;">
+	return '<div id="myModal" class="modal fade" role="dialog" style="width: 70%; margin-left: -35%; z-index: -10;display:none;">
   				<div class="modal-dialog">
 				    <div class="modal-content">
       					<div class="modal-header">

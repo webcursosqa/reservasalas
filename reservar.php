@@ -148,11 +148,6 @@ echo html_writer::div($modal, "modaldiv");
 		jQuery('.modal').modal('hide');
 	});
 		$( document ).on( "click", "#button", function() {
-		jQuery('#myModal').css('z-index', '10').modal('show');
-	});
-</script>
-<script type="text/javascript">
-	$(document).ready(function () {
-		$("rect").attr("fill", "transparent");
+		jQuery('#myModal').css('z-index', '').modal('show');
 	});
 </script>
