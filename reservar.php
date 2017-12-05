@@ -46,9 +46,8 @@ $PAGE->navbar->add ( get_string ( 'reserverooms', 'local_reservasalas' ), 'reser
 echo $OUTPUT->header (); 
 echo $OUTPUT->heading ( get_string ( 'reserveroom', 'local_reservasalas' ) );
 
-//Rules modal for reservasalas
-echo html_writer::nonempty_tag("button", html_writer::tag('h6', get_string("rules","local_reservasalas")), array( "id"=>"button", "class" => "btn", "data-toggle" => "modal", "data-target" => "#myModal"));
-$modal = reservasalas_modal_rules();
+//Rules for reservasalas
+echo html_writer::tag('p', get_string("rules_content", "local_reservasalas"), array("class" => "text-error"));
 
 $form_buscar = new formBuscarSalas();
 
@@ -133,21 +132,5 @@ if ($form_buscar->is_cancelled()) {
 		<?php 
 }
 
-$messageconfirm = "<br><p style=\"font-family:arial;color:red;\">".get_string('notes', 'local_reservasalas')."<br>
-	- ".get_string('confirmmessage', 'local_reservasalas').$OUTPUT->pix_icon('i/valid', get_string('confirm', 'local_reservasalas')).get_string('visibleicon', 'local_reservasalas')."<br>
-	- ".get_string('unabletoattend', 'local_reservasalas')." </p>";
-
-echo $messageconfirm;
-
 echo $OUTPUT->footer (); 
-echo html_writer::div($modal, "modaldiv");
-
 ?>
-<script type="text/javascript">
-	$( document ).on( "click", ".modal-backdrop", function() {
-		jQuery('.modal').modal('hide');
-	});
-		$( document ).on( "click", "#button", function() {
-		jQuery('#myModal').css('z-index', '').modal('show');
-	});
-</script>

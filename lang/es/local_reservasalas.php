@@ -329,8 +329,8 @@ $string["rules_title"] = "Normas Salas de Estudio";
 $string["rules_content"] = 'Estimados estudiantes las normas de las salas de estudio son las siguientes:<br>
 	* La reserva de salas de estudio debe ser realizada exclusivamente por el alumno a través de Webcursos.<br>
 	* Puede reservar hasta con una semana de anticipación.<br>
-	* <b>Confirma tu asistencia</b> desde la opción <b>"mis reservas"</b>, para ello dispones de 20 minutos.<br>
-	 Si no validas tu llegada a la sala, la reserva se anulará automáticamente.<br>
+	* <b>Confirma tu asistencia</b> desde la opción <b><a href="misreservas.php">"mis reservas"</a></b>, para ello dispones de 20 minutos.<br>
+	&nbsp;&nbsp; Si no validas tu llegada a la sala, la reserva se anulará automáticamente.<br>
 	* Puedes reservar 2 módulos al día y 6 módulos a la semana.<br>
 	* Puedes cancelar tu reserva hasta 1 hora antes.<br>
 	* Si no asistes y tampoco cancelas, quedarás bloqueado durante 3 días hábiles.<br>
@@ -338,6 +338,6 @@ $string["rules_content"] = 'Estimados estudiantes las normas de las salas de est
 	* Por favor mantener los celulares silenciados y un volumen moderado de conversación.<br>
 	* El computador de la sala de estudio es para ser utilizado con fines académicos.<br>
 	* Bienvenidos los <b>Snack & Café</b>. No está permitido ingresar con alimentos como frituras, hot dogs,<br>
-	 almuerzos, ensaladas, etc. Para eso los invitamos a utilizar el casino.';
+	&nbsp;&nbsp; almuerzos, ensaladas, etc. Para eso los invitamos a utilizar el casino.';
 
 ?>
