@@ -112,8 +112,9 @@ if ($form_buscar->is_cancelled()) {
 			src="<?php echo $CFG->wwwroot . '/local/reservasalas/salas/salas.nocache.js'; ?>">
 		</script>
 		
-		<div
-			id="buttonsRooms" 
+		<div			
+			id="buttonsRooms"
+			class = "tableClass"
 			moodleurl = " <?php echo $moodleurl; ?>"	
 			initialDate = "<?php echo $fromform->fecha; ?>"
 			typeRoom= "<?php echo $fromform->roomstype; ?>"
@@ -127,7 +128,16 @@ if ($form_buscar->is_cancelled()) {
  			selectDays = "<?php echo $days; ?>"
  			weeklyFrequencyBookings = "<?php echo $fromform->fr['frequency']; ?>"
  			advOptions = "<?php echo $fromform->addmultiply; ?>" >
+			
+			<style type = "text/css">
+				.tableClass{
+					webkit-box-sizing: initial;
+					box-sizing: initial;
+				}
+			</style>
 		</div>
+		
+		
 		
 		<?php 
 }
