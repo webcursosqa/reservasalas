@@ -256,7 +256,8 @@ else if($action == "info"){
 			"well" => $values,
 			"errors" => $error
 	);
-
+	$context = context_system::instance ();
+	$PAGE->set_context ( $context );
 	reservasalas_sendMail($values, $error, $USER->id, $assistants, $eventname, $campusid);
 	
 	$jsonOutputs = array (
