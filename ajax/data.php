@@ -234,7 +234,7 @@ else if($action == "info"){
 						"nombremodulo" => $modulename[$counter],
 						"inicio" => $start[$counter],
 						"termino" => $finish[$counter],
-						"fecha" => $initialDate
+						"fecha" => date ( "Y-m-d", $initialDate )
 				);
 			}else{
 				$error[]=array(
@@ -244,7 +244,7 @@ else if($action == "info"){
 						"nombremodulo" => $modulename[$counter],
 						"inicio" => $start[$counter],
 						"termino" => $finish[$counter],
-						"fecha" => $initialDate
+						"fecha" => date ( "Y-m-d", $initialDate )
 				);
 			}
 		}
