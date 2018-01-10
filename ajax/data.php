@@ -234,7 +234,7 @@ else if($action == "info"){
 						"nombremodulo" => $modulename[$counter],
 						"inicio" => $start[$counter],
 						"termino" => $finish[$counter],
-						"fecha" => $initialDate
+						"fecha" => date ( "Y-m-d", $initialDate )
 				);
 			}else{
 				$error[]=array(
@@ -244,7 +244,7 @@ else if($action == "info"){
 						"nombremodulo" => $modulename[$counter],
 						"inicio" => $start[$counter],
 						"termino" => $finish[$counter],
-						"fecha" => $initialDate
+						"fecha" => date ( "Y-m-d", $initialDate )
 				);
 			}
 		}
@@ -256,7 +256,8 @@ else if($action == "info"){
 			"well" => $values,
 			"errors" => $error
 	);
-
+	$context = context_system::instance ();
+	$PAGE->set_context ( $context );
 	reservasalas_sendMail($values, $error, $USER->id, $assistants, $eventname, $campusid);
 	
 	$jsonOutputs = array (
