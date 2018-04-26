@@ -339,5 +339,5 @@ $string["rules_content"] = 'Estimados estudiantes las normas de las salas de est
 	* El computador de la sala de estudio es para ser utilizado con fines académicos.<br>
 	* Bienvenidos los <b>Snack & Café</b>. No está permitido ingresar con alimentos como frituras, hot dogs,<br>
 	&nbsp;&nbsp; almuerzos, ensaladas, etc. Para eso los invitamos a utilizar el casino.';
-
+$string['notyourreservation'] = 'No deberías borrar la reserva de otros.'
 ?>
