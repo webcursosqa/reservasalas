@@ -32,7 +32,7 @@ require_once($CFG->dirroot.'/local/reservasalas/tablas.php');
 global $PAGE, $CFG, $OUTPUT, $DB;
 require_login();
 $url = new moodle_url('/local/reservasalas/reservausuarios.php');
-$context = context_system::instance();//context_system::instance();
+$context = get_context_instance (CONTEXT_SYSTEM);
 $roles = get_user_roles($context, $USER->id, false);
 var_dump($roles);
 $PAGE->set_context($context);
