@@ -34,7 +34,7 @@ require_login();
 $url = new moodle_url('/local/reservasalas/reservausuarios.php');
 $context = context_system::instance();//context_system::instance();
 $roles = get_user_roles($context, $USER->id, false);
-var_dump(roles);
+var_dump($roles);
 $PAGE->set_context($context);
 $PAGE->set_url($url);
 $PAGE->set_pagelayout('standard');
