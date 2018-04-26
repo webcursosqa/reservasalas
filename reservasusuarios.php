@@ -85,10 +85,10 @@ if($action == 'confirmar'){
 			if(is_siteadmin($USER->id)){
 				echo "is site admin";
 			}
-			if($USER-id == $reserva->alumno_id){
+			if($USER->id == $reserva->alumno_id){
 				echo "is the person who reserved";
 			}
-			if(has_capability('local/reservasalas:overwrite', $context) || is_siteadmin($USER->id) || $USER-id == $reserva->alumno_id){
+			if(has_capability('local/reservasalas:overwrite', $context) || is_siteadmin($USER->id) || $USER->id == $reserva->alumno_id){
 			// actualiza la reserva a un estado inactiva
 			$data = new stdClass();
 			$data->id= $idreserva;
