@@ -63,7 +63,7 @@ $time=time();
 echo "\nStarting at ".date("F j, Y, G:i:s")."\n";
 
 $fechahoy = date ( 'Y-m-d' );
-$hora = date ('H:i');
+$hora = date ('H:i', strtotime('-1 hour'));
 $sql="	Select rr.id as id, rr.alumno_id as userid
 		FROM {reservasalas_reservas} AS rr
 		INNER JOIN {reservasalas_salas} AS rs ON (rr.salas_id = rs.id AND rs.tipo = 2)
