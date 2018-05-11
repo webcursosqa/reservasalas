@@ -338,5 +338,5 @@ $string["rules_content"] = 'Dear students, the rules of study rooms are the foll
 	* The computer in the study room is to be used for academic purposes. <br>
 	* Welcome to the <b> Snack & Café </b>. It is not allowed to enter with foods such as chips, hot dogs, <br>
 	 &nbsp;&nbsp; lunches, salads, etc. For that we invite you to use the casino. ';
-
+$string['notyourreservation'] = 'You should not be trying to delete others reservations.'
 ?>

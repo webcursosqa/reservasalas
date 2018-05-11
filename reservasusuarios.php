@@ -29,7 +29,7 @@ require_once($CFG->dirroot.'/local/reservasalas/forms.php');
 require_once($CFG->dirroot.'/local/reservasalas/tablas.php');
 
 //código para setear contexto, url, layout
-global $PAGE, $CFG, $OUTPUT, $DB;
+global $PAGE, $CFG, $OUTPUT, $DB, $USER;
 require_login();
 $url = new moodle_url('/local/reservasalas/reservausuarios.php');
 $context = context_system::instance();//context_system::instance();
@@ -75,21 +75,26 @@ if($action == 'confirmar'){
 // implementacion action cancelar
 // permite a un administrador concelar una reserva, ya sea hecha por el o no.
 }else if($action == 'cancelar'){
-	if(confirm_sesskey()){
-		$idreserva= required_param('idreserva', PARAM_INT);
 	
-		// actualiza la reserva a un estado inactiva
-		$data = new stdClass();
-		$data->id= $idreserva;
-		$data->activa = 0;
-		$DB->update_record('reservasalas_reservas', $data);
-
-		$reserva = $DB->get_record('reservasalas_reservas', array('id'=>$idreserva));
-		$usuario = $DB->get_record('user', array('id'=>$reserva->alumno_id));
-		$action = 'ver';
-	}else{
-		print_error('ERROR');
-	}
+		if(confirm_sesskey()){
+			$idreserva= required_param('idreserva', PARAM_INT);
+			$reserva = $DB->get_record('reservasalas_reservas', array('id'=>$idreserva));
+			//double check permission.
+			if(has_capability('local/reservasalas:overwrite', $context) || is_siteadmin($USER->id) || $USER->id == $reserva->alumno_id){
+			// actualiza la reserva a un estado inactiva
+			$data = new stdClass();
+			$data->id= $idreserva;
+			$data->activa = 0;
+			$DB->update_record('reservasalas_reservas', $data);
+	
+			$reserva = $DB->get_record('reservasalas_reservas', array('id'=>$idreserva));
+			$usuario = $DB->get_record('user', array('id'=>$reserva->alumno_id));
+			$action = 'ver';
+			}
+		}else{
+			print_error('ERROR');
+		}
+		
 
 }
 

@@ -84,10 +84,15 @@ if($action == 'confirmar'){
 	if(confirm_sesskey()){
 		// actualiza la reserva a estado no activa
 		$idreserva= required_param('idreserva', PARAM_INT);
-		$data = new stdClass();
-		$data->id= $idreserva;
-		$data->activa = 0;
-		$DB->update_record('reservasalas_reservas', $data);
+		$reserva = $DB->get_record('reservasalas_reservas', array('id'=>$idreserva));
+		if($USER->id == $reserva->alumno_id){
+			$data = new stdClass();
+			$data->id= $idreserva;
+			$data->activa = 0;
+			$DB->update_record('reservasalas_reservas', $data);
+		}else{
+			print_error(get_string('notyourreservation', 'local_reservasalas'));
+		}
 		//$DB->delete_records('reservasalas_reservas', array('id' => $idreserva));
 		$action = 'ver';
 	}else{
