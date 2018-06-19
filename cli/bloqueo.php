@@ -69,7 +69,7 @@ $sql="	Select rr.id as id, rr.alumno_id as userid
 		INNER JOIN {reservasalas_salas} AS rs ON (rr.salas_id = rs.id AND rs.tipo = 2)
 		INNER JOIN {reservasalas_edificios} AS re ON (re.id = rs.edificios_id)
 		INNER JOIN {reservasalas_modulos} AS rm ON (rm.edificio_id = re.id)
-		WHERE rm.hora_inicio < ? AND rr.fecha_reserva = ? AND rr.confirmado=0 GROUP BY rr.alumno_id";
+		WHERE rm.hora_inicio < ? AND rr.fecha_reserva = ? AND rr.confirmado=0 AND rr.activa = 1 GROUP BY rr.alumno_id";
 
 $sqlparam = array(
 		$hora,
