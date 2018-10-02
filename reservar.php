@@ -41,6 +41,7 @@ $PAGE->set_url ( $baseurl );
 $PAGE->set_pagelayout ( 'standard' );
 $PAGE->set_title ( get_string ( 'reserveroom', 'local_reservasalas' ) );
 $PAGE->set_heading ( get_string ( 'reserveroom', 'local_reservasalas' ) );
+$PAGE->requires->jquery();
 $PAGE->navbar->add ( get_string ( 'roomsreserve', 'local_reservasalas' ) );
 $PAGE->navbar->add ( get_string ( 'reserverooms', 'local_reservasalas' ), 'reservar.php' );
 echo $OUTPUT->header (); 
@@ -105,13 +106,44 @@ if ($form_buscar->is_cancelled()) {
 		
 		//Javascript,CSS and DIV for GWT
 		?>
-		<link rel="stylesheet" type="text/css"  
-			href= "<?php echo $CFG->wwwroot . '/local/reservasalas/salas/css/Salas.css'; ?>"
-		/>
-		<script type="text/javascript" language="javascript" 
-			src="<?php echo $CFG->wwwroot . '/local/reservasalas/salas/salas.nocache.js'; ?>">
-		</script>
 		
+					<style type = "text/css">
+.gridborder {
+    background: #FFFFFF;
+    color: #000000;
+    border: 1px solid #878787;
+    border-radius: 35px;
+    flex: 1;
+    text-align: center;
+}
+.grid {
+    background: #69db46;
+    color: #000000;
+    border: 1px solid #878787;
+    border-radius: 35px;
+    flex: 1;
+    text-align: center;
+}
+.gridocupado {
+    background: #ed7d7d;
+    color: #000000;
+    border: 1px solid #878787;
+    border-radius: 35px;
+    flex: 1;
+    text-align: center;
+}
+.gridblank {
+    background: #FFFFFF;
+    color: #FFFFFF;
+    border: 1px solid #FFFFFF;
+    border-radius: 35px;
+    flex: 1;
+}
+.table-success:hover {
+    cursor: pointer;
+}
+			</style>
+			
 		<div			
 			id="buttonsRooms"
 			class = "tableClass"
@@ -129,18 +161,98 @@ if ($form_buscar->is_cancelled()) {
  			weeklyFrequencyBookings = "<?php echo $fromform->fr['frequency']; ?>"
  			advOptions = "<?php echo $fromform->addmultiply; ?>" >
 			
-			<style type = "text/css">
-				.tableClass{
-					webkit-box-sizing: initial;
-					box-sizing: initial;
-				}
-			</style>
+
 		</div>
+		<div id="grids"></div>
 		
-		
-		
+		<script>
+			$( document ).ready(function() {
+				var today = new Date().toDateString();
+				var thisdate = new Date($('#buttonsRooms').attr('initialDate')*1000).toDateString();
+				$.ajax({
+				    type: 'GET',
+				    url: 'ajax/data.php',
+				    dataType: "json",
+				    data: {
+					      'action' : 'getbooking',
+					      'type' : $('#buttonsRooms').attr('typeRoom'),
+					      'campusid' : $('#buttonsRooms').attr('campus'),
+					      'date' : $('#buttonsRooms').attr('initialDate'),
+					      'multiply' : $('#buttonsRooms').attr('advOptions'),
+					      'size' : $('#buttonsRooms').attr('size'),
+					      'finalDate' : $('#buttonsRooms').attr('endDate'),
+					      'days' : $('#buttonsRooms').attr('days'),
+					      'frequency' : $('#buttonsRooms').attr('weeklyFrequencyBookings')
+				    	},
+				    success: function (response) {
+					    var modulos = response.values.Modulos;
+					    var salas = response.values.Salas;
+					    var d = new Date(); // for now
+					    var date = d.getHours()+":"+d.getMinutes();
+						var num = 1;
+					    var content = "";
+					   	for (var i = 0; i <= salas.length; i++) {
+				            for (var j = 0; j <= modulos.length; j++) {
+				                if (j==0 && i == 0){
+				                	content += "<table class='table table-bordered  table-hover table-light' style='text-align: center;><thead '><tr><th scope='col'></th>";
+				                }else if (i == 0 && j == modulos) {
+				                	content += "<th scope='col'>Modulo: "+ modulos[j-1].name +"</th></tr></thead><tbody>";
+				                }else if (i == 0) {
+				                	content += "<th scope='col'>Modulo: "+ modulos[j-1].name +"</th>";
+						        }else if (j == 0) {
+				                	content += "<tr><th scope='row' >Sala: "+salas[i-1].nombresala +"</th>";
+					            } 
+					            else if (j === modulos) {
+						            if(salas[i-1].disponibilidad[j-1].ocupada == 1 || date > modulos[j-1].horaInicio && today === thisdate){
+						            	content += "<td class='table-danger disabled'><b>"+ salas[i-1].nombresala +"</b><i><small>["+modulos[j-1].horaInicio + " - " +modulos[j-1].horaFin+"]</small></i></td></tr>";
+							        }else{
+				                    	content += "<td class='table-success' data-toggle='modal' data-target='#myModal' moduloid='" +modulos[j-1].id+"' modulo='" +modulos[j-1].name+"' sala='"+ salas[i-1].nombresala +"' salaid='"+ salas[i-1].salaid +"'><b>"+ salas[i-1].nombresala +"</b><i><small>["+modulos[j-1].horaInicio + " - " +modulos[j-1].horaFin+"]</small></i></td></tr>";
+							        }
+				                } else {
+				                	if(salas[i-1].disponibilidad[j-1].ocupada == 1 || date > modulos[j-1].horaInicio && today === thisdate){
+						            	content += "<td  class='table-danger disabled'><b>"+ salas[i-1].nombresala +"</b><i><small>["+modulos[j-1].horaInicio + " - " +modulos[j-1].horaFin+"]</small></i></td>";
+							        }else{
+				                    	content += "<td class='table-success' data-toggle='modal' data-target='#myModal' moduloid='" +modulos[j-1].id+"' modulo='" +modulos[j-1].name+"' sala='"+ salas[i-1].nombresala +"' salaid='"+ salas[i-1].salaid +"'><b>"+ salas[i-1].nombresala +"</b><i><small>["+modulos[j-1].horaInicio + " - " +modulos[j-1].horaFin+"]</small></i></td>";
+							        }
+				                }
+				            }
+				        }
+				        content += "</tbody></table><div class='modal fade' id='myModal' role='dialog'><div class='modal-dialog'><div class='modal-content'><div class='modal-header'><h4 class='modal-title'>Confirmar Reserva</h4> </div> <div class='modal-body'> </div> <div class='modal-footer'> <button type='button' id='confirmar' class='btn btn-primary' data-dismiss='modal'>Confirmar</button><button type='button' class='btn btn-default' data-dismiss='modal'>Close</button> </div> </div></div></div>";
+				        $("#grids").html(content);
+				    }
+				});
+		    $("#grids").on("click", ".table-success", function() {
+			    var grid = $(this);
+		        $("div.modal-body").html("¿Desea reservar la Sala:"+ $(this).attr('sala')+" para el modulo:" + $(this).attr('modulo') + "?")
+
+		          $("#confirmar").click(function() {
+    		    	$.ajax({
+    				    type: 'GET',
+    				    url: 'ajax/data.php',
+    				    dataType: "json",
+    				    data: {
+					      	'action' : 'submission',
+					      	'room' : grid.attr('salaid'),
+					      	'moduleid' : grid.attr('moduloid'),
+    		    			'date' : $('#buttonsRooms').attr('initialDate'),
+    		    			'campusid' : $('#buttonsRooms').attr('campus'),
+    		    			'multiply' : $('#buttonsRooms').attr('advOptions'),
+    		    			'finalDate' : $('#buttonsRooms').attr('endDate'),
+    		    			'days' : $('#buttonsRooms').attr('days'),
+    		    			'frequency' : $('#buttonsRooms').attr('weeklyFrequencyBookings')
+    				    	},
+    				    success: function (response) {
+    console.log(response);
+    console.log(grid.attr('salaid'));
+    console.log(grid.attr('moduloid'));
+    				    }
+    				});
+		    });
+		    });
+		  
+		});
+		</script>
 		<?php 
 }
-
 echo $OUTPUT->footer (); 
 ?>

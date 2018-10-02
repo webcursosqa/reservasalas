@@ -38,19 +38,12 @@ $type = optional_param("type", 0, PARAM_INT);
 $initialDate = optional_param("date", 1, PARAM_INT);
 $multiply = optional_param("multiply", 0, PARAM_INT);
 $size = optional_param("size", 0, PARAM_TEXT);
-$userid = optional_param("userid", 0, PARAM_INT);
 $moduleid = optional_param("moduleid", null, PARAM_TEXT);
 $room = optional_param("room", null, PARAM_TEXT);
-$eventname = optional_param("name", null, PARAM_TEXT);
-$assistants = optional_param("asistentes", 0, PARAM_INT);
 $enddate = optional_param("finalDate", 1, PARAM_INT);
 $days = optional_param("days", null, PARAM_TEXT);
 $frequency = optional_param("frequency", 0, PARAM_INT);
-$start = optional_param("inicio", null, PARAM_TEXT);
-$finish = optional_param("termino", null, PARAM_TEXT);
 $roomname = optional_param("nombresala", null, PARAM_TEXT);
-$modulename = optional_param("nombremodulo", null, PARAM_TEXT);
-$resources = optional_param("resources", "prueba", PARAM_TEXT);
 
 // Callback para from webpage
 $callback = optional_param ( "callback", null, PARAM_RAW_TRIMMED );
@@ -144,12 +137,6 @@ else if($action == "info"){
 	);
 }else if($action == "submission"){
 
-	$room = explode(",",$room);
-	$moduleid = explode(",",$moduleid);
-	$start = explode(",",$start);
-	$finish = explode(",",$finish);
-	$modulename = explode(",",$modulename);
-	$roomname = explode(",",$roomname);
 	$error= array();
 	$values = array();
 	if(!has_capability ( "local/reservasalas:advancesearch", context_system::instance () )){
@@ -165,106 +152,54 @@ else if($action == "info"){
 	}else{
 		$validation = true;
 	}
-	$reservation = array ();
-	for( $counter = 1; $counter < count($room); $counter++ ){
-		if( $multiply == 1 && has_capability ( "local/reservasalas:advancesearch", context_system::instance () )){
-			//calculate all the dates from reserves rooms (Y-m-d)
-			$fechas = reservasalas_daysCalculator($initialDate,$enddate,$days,$frequency);
-			foreach ($fechas as $fecha){
-				if(reservasalas_validationBooking($room[$counter],$moduleid[$counter],$fecha) ){
-					$time = time();
-					$data = array ();
-					$data ["fecha_reserva"] = $fecha;
-					$data ["modulo"] = $moduleid[$counter];
-					$data ["confirmado"] = 0;
-					$data ["activa"] = 1;
-					$data ["alumno_id"] = $USER->id;
-					$data ["salas_id"] = $room[$counter];
-					$data ["fecha_creacion"] = $time;
-					$data ["nombre_evento"] = $eventname;
-					$data ["asistentes"] = $assistants;
-					
-					array_push($reservation,$data);
-					
-					
-					$values[]=array(
-							"sala" => $room[$counter],
-							"nombresala" => $roomname[$counter],
-							"modulo" => $moduleid[$counter],
-							"nombremodulo" => $modulename[$counter],
-							"inicio" => $start[$counter],
-							"termino" => $finish[$counter],
-							"fecha" => $fecha
-					);
-				}else{
-					$error[] = array(
-							"sala" => $room[$counter],
-							"nombresala" => $roomname[$counter],
-							"modulo" => $moduleid[$counter],
-							"nombremodulo" => $modulename[$counter],
-							"inicio" => $start[$counter],
-							"termino" => $finish[$counter],
-							"fecha" => $fecha
-					);
-				}
-			}
+		if( reservasalas_validationBooking($room,$moduleid,date("Y-m-d",$initialDate)) && $validation){
+			$data = new stdClass();
+			$data->fecha_reserva = date ( "Y-m-d", $initialDate );
+			$data->modulo = $moduleid;
+			$data->confirmado = 0;
+			$data->activa = 1;
+			$data->alumno_id = $USER->id;
+			$data->salas_id = $room;
+			$data->fecha_creacion = time();
+			$data->nombre_evento = $USER->firstname.' '.$USER->lastname.' estudio';
+			$data->asistentes = 0;
+			
+			$jsonOutputs = array (
+					"error" => "",
+					"values" => "ok"
+			);
+			$values[]=array(
+					"sala" => $room,
+					"modulo" => $moduleid,
+					"fecha" => date ( "Y-m-d", $initialDate )
+			);
 		}else{
-			if( reservasalas_validationBooking($room[$counter],$moduleid[$counter],date("Y-m-d",$initialDate)) && $validation){
-				$time = time();
-				$data = array ();
-				$data ["fecha_reserva"] = date ( "Y-m-d", $initialDate );
-				$data ["modulo"] = $moduleid[$counter];
-				$data ["confirmado"] = 0;
-				$data ["activa"] = 1;
-				$data ["alumno_id"] = $USER->id;
-				$data ["salas_id"] = $room[$counter];
-				$data ["fecha_creacion"] = $time;
-				$data ["nombre_evento"] = $eventname;
-				$data ["asistentes"] = $assistants;
-				
-				array_push($reservation,$data);
-				$jsonOutputs = array (
-						"error" => "",
-						"values" => "ok"
-				);
-				$values[]=array(
-						"sala" => $room[$counter],
-						"nombresala" => $roomname[$counter],
-						"modulo" => $moduleid[$counter],
-						"nombremodulo" => $modulename[$counter],
-						"inicio" => $start[$counter],
-						"termino" => $finish[$counter],
-						"fecha" => date ( "Y-m-d", $initialDate )
-				);
-			}else{
-				$error[]=array(
-						"sala" => $room[$counter],
-						"nombresala" => $roomname[$counter],
-						"modulo" => $moduleid[$counter],
-						"nombremodulo" => $modulename[$counter],
-						"inicio" => $start[$counter],
-						"termino" => $finish[$counter],
-						"fecha" => date ( "Y-m-d", $initialDate )
-				);
-			}
+			$error[]=array(
+					"sala" => $room,
+					"modulo" => $moduleid,
+					"fecha" => date ( "Y-m-d", $initialDate )
+			);
 		}
-	}
-	
-	$DB->insert_records("reservasalas_reservas", $reservation);
-	
-	$valuesArray = array(
-			"well" => $values,
-			"errors" => $error
-	);
-	$context = context_system::instance ();
-	$PAGE->set_context ( $context );
-	reservasalas_sendMail($values, $error, $USER->id, $assistants, $eventname, $campusid);
-	
-	$jsonOutputs = array (
-			"error" => "",
-			"values" => $valuesArray
-	);
-
+		$lastinsertid = $DB->insert_record("reservasalas_reservas", $data,true);
+		if($lastinsertid > 0){
+        	$valuesArray = array(
+        			"well" => $values,
+        			"errors" => $error
+        	);
+        	$context = context_system::instance ();
+        	$PAGE->set_context ( $context );
+        	reservasalas_sendMail($values, $error, $USER->id, 0, $USER->firstname.' '.$USER->lastname.' estudio', $campusid);
+        	
+        	$jsonOutputs = array (
+        			"error" => "",
+        	    "values" => $lastinsertid
+        	);
+		}else{
+		    $jsonOutputs = array (
+		        "error" => $lastinsertid,
+		        "values" => ""
+		    );
+		}
 }
 
 $jsonOutput = json_encode ( $jsonOutputs );
