@@ -163,8 +163,8 @@ if ($form_buscar->is_cancelled()) {
 			
 
 		</div>
+		<div id="message"></div>
 		<div id="grids"></div>
-		
 		<script>
 			$( document ).ready(function() {
 				var today = new Date().toDateString();
@@ -242,14 +242,23 @@ if ($form_buscar->is_cancelled()) {
     		    			'frequency' : $('#buttonsRooms').attr('weeklyFrequencyBookings')
     				    	},
     				    success: function (response) {
-    console.log(response);
-    console.log(grid.attr('salaid'));
-    console.log(grid.attr('moduloid'));
+        				    console.log(response.error);
+        				    if(response.error != ""){
+        				    	$('#message').addClass('alert alert-danger');
+            				    $('#message').html("Reserva no realizada correctamente.");
+        				    }else{
+        				    	grid.removeClass('table-success');
+            				    grid.addClass('table-danger');
+            				    grid.removeAttr('data-toggle');
+            				    grid.removeAttr('data-target');
+            				    $('#message').addClass('alert alert-success');
+            				    $('#message').html("Reserva realizada correctamente.");
+
+        				    }
     				    }
     				});
 		    });
 		    });
-		  
 		});
 		</script>
 		<?php 
