@@ -865,45 +865,28 @@ class buscadorUsuario extends moodleform{
 	}
 }
 //Formulario para desbloquear alumno
+
 class desbloquearAlumnoForm extends moodleform{
 	function definition(){
 		global $CFG, $DB, $OUTPUT;
 		$usertype=$CFG->user;
-		$mform =& $this->_form;
-        $mform->addElement('text', 'email', get_string('uaiemail', 'local_reservasalas').': ');
-        $mform->addRule('email', get_string('empty', 'local_reservasalas'), 'required');
-		$mform->setType('email', PARAM_TEXT);
-		$mform->addElement('static','','', $usertype);
-		$mform->addElement('textarea', 'comentario', get_string('comment', 'local_reservasalas').': ', 'cols="40" rows="10"' );
+		$mform = $this->_form;
+        $mform->addElement('text', 'search', get_string('searchuser','local_reservasalas'));
+		$mform->setType('search', PARAM_TEXT);
 
-		$this->add_action_buttons(false, get_string('unblock', 'local_reservasalas'));
+		$this->add_action_buttons(false, get_string('filter', 'local_reservasalas'));
 	}
 	function validation($data,$files) {
 		global $DB;
 		$errors=array();
-		$datenow = date('Y-m-d');
-		$bloqueado = false;
 		
-		if(!empty($data['email'])){
-		if($user = $DB->get_record('user', array('email'=>$data['email']))){
-			
-			if($DB->get_record('reservasalas_bloqueados',array('alumno_id'=>$user->id,'estado'=>1))){
-				$bloqueado = true;
-			}
-				
-			if($bloqueado==false){
-				$errors['email'] = get_string('unblockuser', 'local_reservasalas');
-			}
-		}else{
-			$errors['email'] = get_string('notuser', 'local_reservasalas');
-		}
-		}
-		else{
-			$errors['email'] = get_string('empty', 'local_reservasalas');
+		if(empty($data['search'])){
+			$errors['search'] = get_string('empty', 'local_reservasalas');
 		}
 		return $errors;
 	}
 }
+
 class formReservarFecha extends moodleform  {
 	//Add elements to form
 	public function definition() {

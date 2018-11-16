@@ -319,7 +319,7 @@ $string['thecampisempty'] = 'The field is empty';
 $string['noblock'] = 'The user is not block.';
 $string['noexist'] = 'The user dont exist.';
 $string['swap'] = 'swap.';
-$string['empty'] = 'Is needed to fill the email field';
+$string['empty'] = 'Is needed to fill the field';
 $string['confirmmessage'] = 'In order to register you must go to <a href="misreservas.php">My bookings</a>.<br>- You must click on the icon ';
 $string['visibleicon'] = ' which is visible from 5 minutes before and 15 minutes after the start of the module.';
 $string["close"] = "Close";
@@ -338,5 +338,15 @@ $string["rules_content"] = 'Dear students, the rules of study rooms are the foll
 	* The computer in the study room is to be used for academic purposes. <br>
 	* Welcome to the <b> Snack & Café </b>. It is not allowed to enter with foods such as chips, hot dogs, <br>
 	 &nbsp;&nbsp; lunches, salads, etc. For that we invite you to use the casino. ';
-$string['notyourreservation'] = 'You should not be trying to delete others reservations.'
+$string['notyourreservation'] = 'You should not be trying to delete others reservations.';
+$string['name'] = "Name";
+$string['lastname'] = "Lastname";
+$string['email'] = "Email";
+$string['action'] = "Action";
+$string['noblocked'] = "No blocked users";
+$string['unblocked'] = "User successfully unblocked ";
+$string['invalidid'] = "Invalid id";
+$string['failtounblock'] = "Fail to unblock user";
+$string['searchuser'] = "User filter";
+$string['filter'] = "Filter";
 ?>

@@ -236,3 +236,37 @@
 	font-size: 20px;
 	text-align: center;
 }
+.gridborder {
+    background: #FFFFFF;
+    color: #000000;
+    border: 1px solid #878787;
+    border-radius: 35px;
+    flex: 1;
+    text-align: center;
+}
+.grid {
+    background: #69db46;
+    color: #000000;
+    border: 1px solid #878787;
+    border-radius: 35px;
+    flex: 1;
+    text-align: center;
+}
+.gridocupado {
+    background: #ed7d7d;
+    color: #000000;
+    border: 1px solid #878787;
+    border-radius: 35px;
+    flex: 1;
+    text-align: center;
+}
+.gridblank {
+    background: #FFFFFF;
+    color: #FFFFFF;
+    border: 1px solid #FFFFFF;
+    border-radius: 35px;
+    flex: 1;
+}
+.table-success:hover {
+    cursor: pointer;
+}

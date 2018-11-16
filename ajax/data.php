@@ -116,7 +116,7 @@ if($action == "getbooking"){
 	$output = $final;
 	$jsonOutputs = array (
 			"error" => "",
-			"values" => $output
+	    "values" => $output
 	);
 }
 else if($action == "info"){
@@ -152,55 +152,56 @@ else if($action == "info"){
 	}else{
 		$validation = true;
 	}
-		if( reservasalas_validationBooking($room,$moduleid,date("Y-m-d",$initialDate)) && $validation){
-    			$data = new stdClass();
-    			$data->fecha_reserva = date ( "Y-m-d", $initialDate );
-    			$data->modulo = $moduleid;
-    			$data->confirmado = 0;
-    			$data->activa = 1;
-    			$data->alumno_id = $USER->id;
-    			$data->salas_id = $room;
-    			$data->fecha_creacion = time();
-    			$data->nombre_evento = $USER->firstname.' '.$USER->lastname.' estudio';
-    			$data->asistentes = 0;
-    			
-    			$jsonOutputs = array (
-    					"error" => "",
-    					"values" => "ok"
-    			);
-    			$values[]=array(
-    					"sala" => $room,
-    					"modulo" => $moduleid,
-    					"fecha" => date ( "Y-m-d", $initialDate )
-    			);
-    		$lastinsertid = $DB->insert_record("reservasalas_reservas", $data,true);
-    		if($lastinsertid > 0){
-            	$valuesArray = array(
-            			"well" => $values,
-            			"errors" => $error
-            	);
-            	$context = context_system::instance ();
-            	$PAGE->set_context ( $context );
-            	reservasalas_sendMail($values, $error, $USER->id, 0, $USER->firstname.' '.$USER->lastname.' estudio', $campusid);
-            	
-            	$jsonOutputs = array (
-            			"error" => "",
-            	    "values" => $lastinsertid
-            	);
-    		}else{
-    		    $jsonOutputs = array (
-    		        "error" => $lastinsertid,
-    		        "values" => ""
-    		    );
-    		}
-		}else{
-		    $jsonOutputs = array (
-		        "error" => $lastinsertid,
-		        "values" => ""
-		    );
-		}
+	$reservas = array();
+	if($multiply == 1 && has_capability ( "local/reservasalas:advancesearch", context_system::instance () )){
+	    $fechas = reservasalas_daysCalculator($initialDate,$enddate,$days,$frequency);
+	}else{
+	    $fechas = array(date("Y-m-d",$initialDate));
+	}
+    foreach($fechas as $fecha){
+        if( reservasalas_validationBooking($room,$moduleid,$fecha) && $validation){
+            $data = new stdClass();
+            $data->fecha_reserva = $fecha;
+            $data->modulo = $moduleid;
+            $data->confirmado = 0;
+            $data->activa = 1;
+            $data->alumno_id = $USER->id;
+            $data->salas_id = $room;
+            $data->fecha_creacion = time();
+            $data->nombre_evento = $USER->firstname.' '.$USER->lastname.' estudio';
+            $data->asistentes = 0;
+            
+            $lastinsertid = $DB->insert_record("reservasalas_reservas", $data,true);
+            if($lastinsertid > 0){
+                $values[]=array(
+                    "sala" => $room,
+                    "modulo" => $moduleid,
+                    "fecha" => $fecha
+                );
+            }else{
+                $error[] = array(
+                    "sala" => $room,
+                    "modulo" => $moduleid,
+                    "fecha" => $fecha
+                );
+            }
+        }else{
+            $error[] = array(
+                "sala" => $room,
+                "modulo" => $moduleid,
+                "fecha" => $fecha
+            );
+        }
+    }
+    $context = context_system::instance ();
+    $PAGE->set_context ( $context );
+    reservasalas_sendMail($values, $error, $USER->id, 0, $USER->firstname.' '.$USER->lastname.' estudio', $campusid);
+    
+    $jsonOutputs = array (
+        "error" => "",
+        "values" => $values
+    );
 }
-
 $jsonOutput = json_encode ( $jsonOutputs );
 if ($callback){
 	$jsonOutput = $callback . "(" . $jsonOutput . ");";

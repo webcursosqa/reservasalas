@@ -98,12 +98,9 @@ function reservasalas_validationBooking($room, $module, $date) {
 		return true;
 	}
 }
-function reservasalas_daysCalculator($date, $finalDate, $days, $frequency) {
-	$time1 = mktime(0, 0, 0, date("m", $date), date("d", $date), date("Y", $date));
-	$time2 = mktime(0, 0, 0, date("m", $finalDate), date("d", $finalDate), date("Y", $finalDate));
-	
+function reservasalas_daysCalculator($date, $finalDate, $days, $frequency) {	
 	// Obtain the amount of time between the starting date and the final date
-	$diference = $time2 - $time1;
+    $diference = $finalDate - $date;
 	
 	// $diference is in Unix time, seconds are converted to minutes (60), minutes to hours (60), and hours to days (24)
 	$daysInterval = $diference / (60 * 60 * 24);
@@ -160,7 +157,7 @@ function reservasalas_daysCalculator($date, $finalDate, $days, $frequency) {
 	
 	return $repeat;
 }
-function reservasalas_sendMail($values, $error, $user, $asistentes, $eventname, $buildingid) {
+function reservasalas_sendMail($values, $errors, $user, $asistentes, $eventname, $buildingid) {
 	GLOBAL $USER, $DB;
 	$userfrom = core_user::get_noreply_user();
 	$userfrom->maildisplay = true;
@@ -190,10 +187,22 @@ function reservasalas_sendMail($values, $error, $user, $asistentes, $eventname, 
 		$stamp = strtotime($value["fecha"]);
 		$day = date("l", $stamp);
 		$nombremodulo = $DB->get_field('reservasalas_modulos','nombre_modulo',array("id"=>$value["modulo"]));
-		$nombresala = $DB->get_field('reservasalas_salas','nombre',array("id"=>$value["modulo"]));
+		$nombresala = $DB->get_field('reservasalas_salas','nombre',array("id"=>$value["sala"]));
 		$message .= get_string("date", "local_reservasalas") . ": " . $day . " " . $value["fecha"] . " - " 
 		    . get_string("room", "local_reservasalas") . ": " . $nombresala . " - " 
-				    . get_string("module", "local_reservasalas") . ": " . $nombremodulo . "\n";
+		        . get_string("module", "local_reservasalas") . ": " . $nombremodulo . " - " 
+                . "ok. \n"
+				        ;
+	} 
+	foreach ($errors as $error) {
+	    $stamp = strtotime($error["fecha"]);
+	    $day = date("l", $stamp);
+	    $nombremodulo = $DB->get_field('reservasalas_modulos','nombre_modulo',array("id"=>$error["modulo"]));
+	    $nombresala = $DB->get_field('reservasalas_salas','nombre',array("id"=>$error["sala"]));
+	    $message .= get_string("date", "local_reservasalas") . ": " . $day . " " . $error["fecha"] . " - "
+	        . get_string("room", "local_reservasalas") . ": " . $nombresala . " - "
+	            . get_string("module", "local_reservasalas") . ": " . $nombremodulo . " - "
+	                . "error. \n";
 	} 
 	$messageconfirm = "\n Recuerda confirmar tu reserva, es posible desde 5 minutos antes y hasta 15 minutos después del comienzo del módulo. Se realiza en <a href='http://webcursos.uai.cl/local/reservasalas/misreservas.php'>Bloque UAI/Mis reservas.</a>";
 	$message.=$messageconfirm;

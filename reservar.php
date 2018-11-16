@@ -106,44 +106,6 @@ if ($form_buscar->is_cancelled()) {
 		
 		//Javascript,CSS and DIV for GWT
 		?>
-		
-					<style type = "text/css">
-.gridborder {
-    background: #FFFFFF;
-    color: #000000;
-    border: 1px solid #878787;
-    border-radius: 35px;
-    flex: 1;
-    text-align: center;
-}
-.grid {
-    background: #69db46;
-    color: #000000;
-    border: 1px solid #878787;
-    border-radius: 35px;
-    flex: 1;
-    text-align: center;
-}
-.gridocupado {
-    background: #ed7d7d;
-    color: #000000;
-    border: 1px solid #878787;
-    border-radius: 35px;
-    flex: 1;
-    text-align: center;
-}
-.gridblank {
-    background: #FFFFFF;
-    color: #FFFFFF;
-    border: 1px solid #FFFFFF;
-    border-radius: 35px;
-    flex: 1;
-}
-.table-success:hover {
-    cursor: pointer;
-}
-			</style>
-			
 		<div			
 			id="buttonsRooms"
 			class = "tableClass"
@@ -160,11 +122,10 @@ if ($form_buscar->is_cancelled()) {
  			selectDays = "<?php echo $days; ?>"
  			weeklyFrequencyBookings = "<?php echo $fromform->fr['frequency']; ?>"
  			advOptions = "<?php echo $fromform->addmultiply; ?>" >
-			
-
 		</div>
 		<div id="message"></div>
 		<div id="grids"></div>
+		
 		<script>
 			$( document ).ready(function() {
 				var today = new Date().toDateString();
@@ -181,7 +142,7 @@ if ($form_buscar->is_cancelled()) {
 					      'multiply' : $('#buttonsRooms').attr('advOptions'),
 					      'size' : $('#buttonsRooms').attr('size'),
 					      'finalDate' : $('#buttonsRooms').attr('endDate'),
-					      'days' : $('#buttonsRooms').attr('days'),
+					      'days' : $('#buttonsRooms').attr('selectDays'),
 					      'frequency' : $('#buttonsRooms').attr('weeklyFrequencyBookings')
 				    	},
 				    success: function (response) {
@@ -203,16 +164,16 @@ if ($form_buscar->is_cancelled()) {
 				                	content += "<tr><th scope='row' >Sala: "+salas[i-1].nombresala +"</th>";
 					            } 
 					            else if (j === modulos) {
-						            if(salas[i-1].disponibilidad[j-1].ocupada == 1 || date > modulos[j-1].horaInicio && today === thisdate){
+						            if(salas[i-1].disponibilidad[j-1].ocupada == 1 || date > modulos[j-1].horaFin && today === thisdate){
 						            	content += "<td class='table-danger disabled'><b>"+ salas[i-1].nombresala +"</b><i><small>["+modulos[j-1].horaInicio + " - " +modulos[j-1].horaFin+"]</small></i></td></tr>";
 							        }else{
-				                    	content += "<td class='table-success' data-toggle='modal' data-target='#myModal' moduloid='" +modulos[j-1].id+"' modulo='" +modulos[j-1].name+"' sala='"+ salas[i-1].nombresala +"' salaid='"+ salas[i-1].salaid +"'><b>"+ salas[i-1].nombresala +"</b><i><small>["+modulos[j-1].horaInicio + " - " +modulos[j-1].horaFin+"]</small></i></td></tr>";
+				                    	content += "<td class='table-success' data-toggle='modal' data-target='#myModal' id='"+modulos[j-1].id+salas[i-1].salaid+"' moduloid='" +modulos[j-1].id+"' modulo='" +modulos[j-1].name+"' sala='"+ salas[i-1].nombresala +"' salaid='"+ salas[i-1].salaid +"'><b>"+ salas[i-1].nombresala +"</b><i><small>["+modulos[j-1].horaInicio + " - " +modulos[j-1].horaFin+"]</small></i></td></tr>";
 							        }
 				                } else {
-				                	if(salas[i-1].disponibilidad[j-1].ocupada == 1 || date > modulos[j-1].horaInicio && today === thisdate){
+				                	if(salas[i-1].disponibilidad[j-1].ocupada == 1 || date > modulos[j-1].horaFin && today === thisdate){
 						            	content += "<td  class='table-danger disabled'><b>"+ salas[i-1].nombresala +"</b><i><small>["+modulos[j-1].horaInicio + " - " +modulos[j-1].horaFin+"]</small></i></td>";
 							        }else{
-				                    	content += "<td class='table-success' data-toggle='modal' data-target='#myModal' moduloid='" +modulos[j-1].id+"' modulo='" +modulos[j-1].name+"' sala='"+ salas[i-1].nombresala +"' salaid='"+ salas[i-1].salaid +"'><b>"+ salas[i-1].nombresala +"</b><i><small>["+modulos[j-1].horaInicio + " - " +modulos[j-1].horaFin+"]</small></i></td>";
+				                    	content += "<td class='table-success' data-toggle='modal' data-target='#myModal' id='"+modulos[j-1].id+salas[i-1].salaid+"' moduloid='" +modulos[j-1].id+"' modulo='" +modulos[j-1].name+"' sala='"+ salas[i-1].nombresala +"' salaid='"+ salas[i-1].salaid +"'><b>"+ salas[i-1].nombresala +"</b><i><small>["+modulos[j-1].horaInicio + " - " +modulos[j-1].horaFin+"]</small></i></td>";
 							        }
 				                }
 				            }
@@ -223,9 +184,9 @@ if ($form_buscar->is_cancelled()) {
 				});
 		    $("#grids").on("click", ".table-success", function() {
 			    var grid = $(this);
-		        $("div.modal-body").html("¿Desea reservar la Sala:"+ $(this).attr('sala')+" para el modulo:" + $(this).attr('modulo') + "?")
+		        $("div.modal-body").html("¿Desea reservar la Sala:"+ $(this).attr('salaid')+" para el modulo:" + $(this).attr('moduloid') + "?")
 
-		          $("#confirmar").click(function() {
+		          $("#confirmar").one("click", function() {
     		    	$.ajax({
     				    type: 'GET',
     				    url: 'ajax/data.php',
@@ -238,11 +199,10 @@ if ($form_buscar->is_cancelled()) {
     		    			'campusid' : $('#buttonsRooms').attr('campus'),
     		    			'multiply' : $('#buttonsRooms').attr('advOptions'),
     		    			'finalDate' : $('#buttonsRooms').attr('endDate'),
-    		    			'days' : $('#buttonsRooms').attr('days'),
+    		    			'days' : $('#buttonsRooms').attr('selectDays'),
     		    			'frequency' : $('#buttonsRooms').attr('weeklyFrequencyBookings')
     				    	},
     				    success: function (response) {
-        				    console.log(response.error);
         				    if(response.error != ""){
         				    	$('#message').addClass('alert alert-danger');
             				    $('#message').html("Reserva no realizada correctamente.");
@@ -255,6 +215,7 @@ if ($form_buscar->is_cancelled()) {
             				    $('#message').html("Reserva realizada correctamente.");
 
         				    }
+        				    
     				    }
     				});
 		    });

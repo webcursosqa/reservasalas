@@ -320,7 +320,7 @@ $string['thecampisempty'] = 'El campo esta vacio';
 $string['noblock'] = 'El usuario no esta bloqueado.';
 $string['noexist'] ='El usuario ingresado no existe.';
 $string['swap'] = 'intercambiar.';
-$string['empty'] = 'Es necesario rellenar el campo email.';
+$string['empty'] = 'Es necesario rellenar el campo.';
 $string['confirmmessage'] = 'Para confirmar debes ingresar a <a href="misreservas.php">Mis reservas</a>.<br>- Debes hacer click en el icono ';
 $string['visibleicon'] = ' que estará visible desde 5 minutos antes y hasta 15 minutos después del comienzo del módulo.';
 $string["close"] = "Cerrar";
@@ -339,5 +339,15 @@ $string["rules_content"] = 'Estimados estudiantes las normas de las salas de est
 	* El computador de la sala de estudio es para ser utilizado con fines académicos.<br>
 	* Bienvenidos los <b>Snack & Café</b>. No está permitido ingresar con alimentos como frituras, hot dogs,<br>
 	&nbsp;&nbsp; almuerzos, ensaladas, etc. Para eso los invitamos a utilizar el casino.';
-$string['notyourreservation'] = 'No deberías borrar la reserva de otros.'
+$string['notyourreservation'] = 'No deberías borrar la reserva de otros.';
+$string['name'] = "Nombre";
+$string['lastname'] = "Apellido";
+$string['email'] = "Email";
+$string['action'] = "Acciones";
+$string['noblocked'] = "No existen usuarios bloqueados";
+$string['unblocked'] = "Usuario desbloqueado con éxito";
+$string['invalidid'] = "Id inválido";
+$string['failtounblock'] = "Error usuario no desbloqueado";
+$string['searchuser'] = "Filtrar usuarios";
+$string['filter'] = "Filtrar";
 ?>
