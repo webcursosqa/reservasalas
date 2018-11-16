@@ -94,7 +94,7 @@ if($action == 'view'){
     }
     $query = 'Select u.id, u.username, u.firstname, u.lastname, MAX(rb.estado) as estado
                 from mdl_user as u
-                inner join mdl_reservasalas_bloqueados as rb on (u.id = rb.alumno_id)
+                left join mdl_reservasalas_bloqueados as rb on (u.id = rb.alumno_id)
                 where '.$DB->sql_like('username', ':search1' , $casesensitive = false, $accentsensitive = false, $notlike = false).'
                 OR '.$DB->sql_like('firstname', ':search2' , $casesensitive = false, $accentsensitive = false, $notlike = false).'
                 OR '.$DB->sql_like('lastname', ':search3' , $casesensitive = false, $accentsensitive = false, $notlike = false).'
