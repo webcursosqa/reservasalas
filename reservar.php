@@ -33,6 +33,9 @@ require_once ($CFG->dirroot . '/local/reservasalas/tablas.php');
 global $DB, $USER, $CFG;
 
 require_login (); 
+if (isguestuser()){
+    die();
+}
 
 $baseurl = new moodle_url ( '/local/reservasalas/reservar.php' ); 
 $context = context_system::instance (); 

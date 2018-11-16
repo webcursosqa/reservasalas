@@ -34,7 +34,17 @@ require_once($CFG->dirroot.'/local/reservasalas/tablas.php');
 
 global $PAGE, $CFG, $OUTPUT, $DB;
 require_login();
-$url = new moodle_url('/local/reservasalas/bloquear.php'); 
+if (isguestuser()){
+    die();
+}
+
+$action = optional_param("action", "view", PARAM_TEXT);
+$id = optional_param("id", 0, PARAM_INT);
+$search = optional_param("search", null, PARAM_TEXT);
+$page = optional_param('page', 0, PARAM_INT);
+$perpage = 30;
+
+$url = new moodle_url('/local/reservasalas/bloquear.php');
 $context = context_system::instance();//context_system::instance();
 $PAGE->set_context($context);
 $PAGE->set_url($url);
@@ -44,7 +54,7 @@ $PAGE->set_pagelayout('standard');
 //Valida la capacidad del usuario de poder ver el contenido
 //En este caso solo administradores del módulo pueden ingresar
 if(!has_capability('local/reservasalas:blocking', $context)) {
-		print_error(get_string('INVALID_ACCESS','Reserva_Sala'));
+    print_error(get_string('INVALID_ACCESS','Reserva_Sala'));
 }
 
 //Migas de pan
@@ -52,48 +62,85 @@ $PAGE->navbar->add(get_string('roomsreserve', 'local_reservasalas'),'reservar.ph
 $PAGE->navbar->add(get_string('users', 'local_reservasalas'));
 $PAGE->navbar->add(get_string('blockstudent', 'local_reservasalas'),'bloquear.php');
 
-
-//Formulario para bloquear a un alumno
-$buscador = new buscadorUsuario(null);
-if($fromform = $buscador->get_data()){
-	//Bloquea al usuario en la base de datos
-	if($usuario = $DB->get_record('user',array('email'=>$fromform->email))){
-		$record = new stdClass();
-		$record->comentarios = $fromform->comentario;
-		$record->alumno_id = $usuario->id;
-		$record->estado = 1;
-		$record->fecha_bloqueo = date('Y-m-d');
-		$record->id_reserva = ""; 
-		
-		$DB->insert_record('reservasalas_bloqueados', $record);
-		$bloqueado = true;
-	}
-}
-
-//Se carga la pagina, ya sea el titulo, head y migas de pan.
-
-$o = '';
 $title = get_string('blockstudent', 'local_reservasalas');
 $PAGE->set_title($title);
 $PAGE->set_heading($title);
-$o .= $OUTPUT->header();
-$o .= $OUTPUT->heading($title);
+echo $OUTPUT->header();
+echo $OUTPUT->heading($title);
 
-
-//Dependiendo si el correo institucional es correcto, y a la ves
-//El usuario no ha sidobloqueado, o el usuario ya se encontraba bloqueado,
-//Se desplegara la información correspondiente sobre éxito o fracaso de la operación
-if(isset($bloqueado)){
-	$o.= get_string('thestudent', 'local_reservasalas').$usuario->firstname." ".$usuario->lastname.get_string('suspendeduntilthe', 'local_reservasalas').date('d-m-Y', strtotime("+ 3 days"));
-	$o .= $OUTPUT->single_button('bloquear.php', get_string('blockagain', 'local_reservasalas'));
-}else{
-	//$o .= "<strong>Nombre:</strong> ".$usuario->firstname." ".$usuario->lastname;
-	ob_start();
-    $buscador->display();
-    $o .= ob_get_contents();
-    ob_end_clean();
+if($action == 'block'){
+    if(!$id > 0){
+        print_error(get_string('invalidid','local_reservasalas'));
+    }
+    $userblock = new stdClass();
+    $userblock->fecha_bloqueo = date("Y-m-d",time());
+    $userblock->id_reserva = null;
+    $userblock->estado = 1;
+    $userblock->comentario = null;
+    $userblock->alumno_id = $id;
+    
+    if($block = $DB->insert_record('reservasalas_bloqueados',$userblock, true)){
+        echo html_writer::div(get_string('blocked','local_reservasalas'), 'alert alert-success');
+        $action = 'view';
+    }else{
+        print_error(get_string('failtounblock','local_reservasalas'));
+    }
 }
-
-$o .= $OUTPUT->footer();
-
-echo $o;
+if($action == 'view'){
+    //Formulario para bloquear a un alumno
+    $form = new buscadorUsuario(null);
+    if($fromform = $form->get_data()){
+        $search = $fromform->email;
+    }
+    $query = 'Select u.id, u.username, u.firstname, u.lastname, MAX(rb.estado) as estado
+                from mdl_user as u
+                inner join mdl_reservasalas_bloqueados as rb on (u.id = rb.alumno_id)
+                where '.$DB->sql_like('username', ':search1' , $casesensitive = false, $accentsensitive = false, $notlike = false).'
+                OR '.$DB->sql_like('firstname', ':search2' , $casesensitive = false, $accentsensitive = false, $notlike = false).'
+                OR '.$DB->sql_like('lastname', ':search3' , $casesensitive = false, $accentsensitive = false, $notlike = false).'
+                group by u.id';
+	//Bloquea al usuario en la base de datos
+    if($usuarios = $DB->get_records_sql($query,array('search1'=>$search, 'search2'=>$search, 'search3'=>$search))){
+        $countblock = $DB->count_records_sql($query,array('search1'=>$search, 'search2'=>$search, 'search3'=>$search));
+        $table = new html_table();
+        $table->head = array(
+            '#',
+            get_string('name','local_reservasalas'),
+            get_string('lastname','local_reservasalas'),
+            get_string('email','local_reservasalas'),
+            get_string('action','local_reservasalas')
+        );
+        $counter = $page * $perpage + 1;
+        foreach($usuarios as $usuario){
+            if($usuario->estado == 1){
+                $action = '<strike>'.get_string('blocked','local_reservasalas').'</strike>';
+                $firstname = '<strike>'.$usuario->firstname.'</strike>';
+                $lastname = '<strike>'.$usuario->lastname.'</strike>';
+                $username = '<strike>'.$usuario->username.'</strike>';
+            }else{
+                $action = $OUTPUT->single_button(new moodle_url($url, array('action'=>'block', 'id'=>$usuario->id)), get_string('block','local_reservasalas'));
+                $firstname = $usuario->firstname;
+                $lastname = $usuario->lastname;
+                $username = $usuario->username;
+            }
+            $table->data[] = array(
+                $counter,
+                $firstname,
+                $lastname,
+                $username,
+                $action
+            );
+            $counter++;
+        }
+        $dom = $form->display();
+        $dom .= html_writer::table($table);
+        $dom .= $OUTPUT->paging_bar(round($countblock/$perpage), $page, $perpage,
+            $CFG->wwwroot . '/local/reservasalas/desbloquear.php?action=' . $action . '&search=' . $search . '&page=');
+    }else{
+        $dom = $form->display();
+        $dom .= html_writer::div(get_string('nouser','local_reservasalas'), 'alert alert-warning');
+    }
+    
+    echo $dom;
+    echo $OUTPUT->footer();
+}

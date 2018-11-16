@@ -347,6 +347,8 @@ $string['noblocked'] = "No blocked users";
 $string['unblocked'] = "User successfully unblocked ";
 $string['invalidid'] = "Invalid id";
 $string['failtounblock'] = "Fail to unblock user";
-$string['searchuser'] = "User filter";
+$string['searchuser'] = "User email filter";
 $string['filter'] = "Filter";
+$string['nouser'] = "No users were found";
+$string['blocked'] = 'Blocked';
 ?>

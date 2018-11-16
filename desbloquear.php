@@ -62,30 +62,7 @@ $PAGE->set_title($title);
 $PAGE->set_heading($title);
 echo $OUTPUT->header();
 echo $OUTPUT->heading($title);
-//$PAGE->set_title('UAI Webcursos');
-//$PAGE->set_heading('UAI Webcursos');
 
-//Formulario para desloquear a un alumno
-/*$desbloquearform = new desbloquearAlumnoForm();
-
-if($fromform = $desbloquearform->get_data()){
-	//Si el formualario fue enviado y el alumno existe y ademas esta bloqueado, lo desbloqueara.
-	//De lo contrario mostrata mensajes acordes al error ocurrido.
-	if($usuario = $DB->get_record('user',array('email'=>$fromform->email))){
-		$dateahora = date('Y-m-d');
-		if($bloqueo = $DB->get_record('reservasalas_bloqueados',array('alumno_id'=>$usuario->id,'estado'=>1))){//('reservasalas_bloqueados', array('alumno_id'=>$usuario->id));
-			$record = new stdClass();
-			$record->id = $bloqueo->id;
-			$record->id_reserva = $bloqueo->id_reserva;
-			$record->comentarios = $fromform->comentario;
-			$record->estado = 0;
-	
-			$DB->update_record('reservasalas_bloqueados', $record);
-			$desbloqueado = true;
-		}
-	}
-}
-*/
 if($action == 'unblock'){
     if(!$id > 0){
         print_error(get_string('invalidid','local_reservasalas'));
@@ -102,14 +79,28 @@ if($action == 'unblock'){
 }
 if($action == 'view'){
     $form = new desbloquearAlumnoForm();
-    $like='';
     if($data = $form->get_data()){
         $search = $data->search;
     }
-    if($bloqueados = $DB->get_records_sql('Select rb.id,u.username,u.firstname, u.lastname, rb.fecha_bloqueo from {reservasalas_bloqueados} as rb inner join {user} as u on (u.id = rb.alumno_id) where estado = :estado AND '.$DB->sql_like('username', ':search' , $casesensitive = false, $accentsensitive = false, $notlike = false), array("estado" => 1, "search" => "%$search%"), $page * $perpage, $perpage)){
+    $like='';
+    $query = 'Select rb.id,u.username,u.firstname, u.lastname, rb.fecha_bloqueo 
+                from {reservasalas_bloqueados} as rb 
+                inner join {user} as u on (u.id = rb.alumno_id) 
+                where estado = :estado 
+                AND ('.$DB->sql_like('username', ':search1' , $casesensitive = false, $accentsensitive = false, $notlike = false).' 
+                OR '.$DB->sql_like('firstname', ':search2' , $casesensitive = false, $accentsensitive = false, $notlike = false).'
+                OR '.$DB->sql_like('lastname', ':search3' , $casesensitive = false, $accentsensitive = false, $notlike = false).')';
+    if($bloqueados = $DB->get_records_sql($query, array("estado" => 1, "search1" => "%$search%","search2" => "%$search%","search3" => "%$search%"), $page * $perpage, $perpage)){
         $countblock = $DB->count_records_sql('Select count(id) from {reservasalas_bloqueados} where estado = ?', array(1));
         $table = new html_table();
-        $table->head = array('#',get_string('date','local_reservasalas'),get_string('name','local_reservasalas'),get_string('lastname','local_reservasalas'),get_string('email','local_reservasalas'),get_string('action','local_reservasalas'));
+        $table->head = array(
+            '#',
+            get_string('date','local_reservasalas'),
+            get_string('name','local_reservasalas'),
+            get_string('lastname','local_reservasalas'),
+            get_string('email','local_reservasalas'),
+            get_string('action','local_reservasalas')
+        );
         $counter = $page * $perpage + 1;
         foreach($bloqueados as $bloqueado){
             $table->data[] = array(
@@ -122,22 +113,17 @@ if($action == 'view'){
             );
             $counter++;
         }
-        $table = $form->display();
-        $table .= html_writer::table($table);
-        $table .= $OUTPUT->paging_bar(round($countblock/$perpage), $page, $perpage,
+        $dom = $form->display();
+        $dom .= html_writer::table($table);
+        $dom .= $OUTPUT->paging_bar(round($countblock/$perpage), $page, $perpage,
             $CFG->wwwroot . '/local/reservasalas/desbloquear.php?action=' . $action . '&search=' . $search . '&page=');
     }else{
-        $table = html_writer::div(get_string('noblocked','local_reservasalas'), 'alert alert-warning');
+        $dom = $form->display();
+        $dom .= html_writer::div(get_string('noblocked','local_reservasalas'), 'alert alert-warning');
     }
-   /* echo $OUTPUT->paging_bar(count($bloqueados), $page, $perpage,
-        new moodle_url( '/local/reservasalas/history.php', array(
-            "action" => $action,
-            "search" => $search,
-            "page" => $page
-        )));*/
     
     //Se carga la página, ya sea el título, head y migas de pan.
     
-    echo $table;
+    echo $dom;
     echo $OUTPUT->footer();
 }

@@ -348,6 +348,8 @@ $string['noblocked'] = "No existen usuarios bloqueados";
 $string['unblocked'] = "Usuario desbloqueado con éxito";
 $string['invalidid'] = "Id inválido";
 $string['failtounblock'] = "Error usuario no desbloqueado";
-$string['searchuser'] = "Filtrar usuarios";
+$string['searchuser'] = "Filtrar por email de usuarios";
 $string['filter'] = "Filtrar";
+$string['nouser'] = "No se encontraron usuarios";
+$string['blocked'] = 'Bloqueado';
 ?>
