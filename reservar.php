@@ -130,99 +130,182 @@ if ($form_buscar->is_cancelled()) {
 		<div id="grids"></div>
 		
 		<script>
-			$( document ).ready(function() {
-				var today = new Date().toDateString();
-				var thisdate = new Date($('#buttonsRooms').attr('initialDate')*1000).toDateString();
-				$.ajax({
-				    type: 'GET',
-				    url: 'ajax/data.php',
-				    dataType: "json",
-				    data: {
-					      'action' : 'getbooking',
-					      'type' : $('#buttonsRooms').attr('typeRoom'),
-					      'campusid' : $('#buttonsRooms').attr('campus'),
-					      'date' : $('#buttonsRooms').attr('initialDate'),
-					      'multiply' : $('#buttonsRooms').attr('advOptions'),
-					      'size' : $('#buttonsRooms').attr('size'),
-					      'finalDate' : $('#buttonsRooms').attr('endDate'),
-					      'days' : $('#buttonsRooms').attr('selectDays'),
-					      'frequency' : $('#buttonsRooms').attr('weeklyFrequencyBookings')
-				    	},
-				    success: function (response) {
-					    var modulos = response.values.Modulos;
-					    var salas = response.values.Salas;
-					    var d = new Date(); // for now
-					    var date = d.getHours()+":"+d.getMinutes();
-						var num = 1;
-					    var content = "";
-					   	for (var i = 0; i <= salas.length; i++) {
-				            for (var j = 0; j <= modulos.length; j++) {
-				                if (j==0 && i == 0){
-				                	content += "<table class='table table-bordered  table-hover table-light' style='text-align: center;><thead '><tr><th scope='col'></th>";
-				                }else if (i == 0 && j == modulos) {
-				                	content += "<th scope='col'>Modulo: "+ modulos[j-1].name +"</th></tr></thead><tbody>";
-				                }else if (i == 0) {
-				                	content += "<th scope='col'>Modulo: "+ modulos[j-1].name +"</th>";
-						        }else if (j == 0) {
-				                	content += "<tr><th scope='row' >Sala: "+salas[i-1].nombresala +"</th>";
-					            } 
-					            else if (j === modulos) {
-						            if(salas[i-1].disponibilidad[j-1].ocupada == 1 || date > modulos[j-1].horaFin && today === thisdate){
-						            	content += "<td class='table-danger disabled'><b>"+ salas[i-1].nombresala +"</b><i><small>["+modulos[j-1].horaInicio + " - " +modulos[j-1].horaFin+"]</small></i></td></tr>";
-							        }else{
-				                    	content += "<td class='table-success' data-toggle='modal' data-target='#myModal' id='"+modulos[j-1].id+salas[i-1].salaid+"' moduloid='" +modulos[j-1].id+"' modulo='" +modulos[j-1].name+"' sala='"+ salas[i-1].nombresala +"' salaid='"+ salas[i-1].salaid +"'><b>"+ salas[i-1].nombresala +"</b><i><small>["+modulos[j-1].horaInicio + " - " +modulos[j-1].horaFin+"]</small></i></td></tr>";
-							        }
-				                } else {
-				                	if(salas[i-1].disponibilidad[j-1].ocupada == 1 || date > modulos[j-1].horaFin && today === thisdate){
-						            	content += "<td  class='table-danger disabled'><b>"+ salas[i-1].nombresala +"</b><i><small>["+modulos[j-1].horaInicio + " - " +modulos[j-1].horaFin+"]</small></i></td>";
-							        }else{
-				                    	content += "<td class='table-success' data-toggle='modal' data-target='#myModal' id='"+modulos[j-1].id+salas[i-1].salaid+"' moduloid='" +modulos[j-1].id+"' modulo='" +modulos[j-1].name+"' sala='"+ salas[i-1].nombresala +"' salaid='"+ salas[i-1].salaid +"'><b>"+ salas[i-1].nombresala +"</b><i><small>["+modulos[j-1].horaInicio + " - " +modulos[j-1].horaFin+"]</small></i></td>";
-							        }
-				                }
-				            }
-				        }
-				        content += "</tbody></table><div class='modal fade' id='myModal' role='dialog'><div class='modal-dialog'><div class='modal-content'><div class='modal-header'><h4 class='modal-title'>Confirmar Reserva</h4> </div> <div class='modal-body'> </div> <div class='modal-footer'> <button type='button' id='confirmar' class='btn btn-primary' data-dismiss='modal'>Confirmar</button><button type='button' class='btn btn-default' data-dismiss='modal'>Close</button> </div> </div></div></div>";
-				        $("#grids").html(content);
-				    }
-				});
-		    $("#grids").on("click", ".table-success", function() {
-			    var grid = $(this);
-		        $("div.modal-body").html("¿Desea reservar la Sala:"+ $(this).attr('salaid')+" para el modulo:" + $(this).attr('moduloid') + "?")
+		<!--Add 0 to hours for comparison-->
+		function addZero(i) {
+		    if (i < 10) {
+		        i = "0" + i;
+		    }
+		    return i;
+		}
+		<!--Wait for the document to be loaded before executing.-->
+		$( document ).ready(function() {
+			//Today date to string
+			var today = new Date().toDateString();
+			//Form date to string
+			var thisdate = new Date($('#buttonsRooms').attr('initialDate')*1000).toDateString();
 
-		          $("#confirmar").one("click", function() {
-    		    	$.ajax({
-    				    type: 'GET',
-    				    url: 'ajax/data.php',
-    				    dataType: "json",
-    				    data: {
-					      	'action' : 'submission',
-					      	'room' : grid.attr('salaid'),
-					      	'moduleid' : grid.attr('moduloid'),
-    		    			'date' : $('#buttonsRooms').attr('initialDate'),
-    		    			'campusid' : $('#buttonsRooms').attr('campus'),
-    		    			'multiply' : $('#buttonsRooms').attr('advOptions'),
-    		    			'finalDate' : $('#buttonsRooms').attr('endDate'),
-    		    			'days' : $('#buttonsRooms').attr('selectDays'),
-    		    			'frequency' : $('#buttonsRooms').attr('weeklyFrequencyBookings')
-    				    	},
-    				    success: function (response) {
-        				    if(response.error != ""){
-        				    	$('#message').addClass('alert alert-danger');
-            				    $('#message').html("Reserva no realizada correctamente.");
-        				    }else{
-        				    	grid.removeClass('table-success');
-            				    grid.addClass('table-danger');
-            				    grid.removeAttr('data-toggle');
-            				    grid.removeAttr('data-target');
-            				    $('#message').addClass('alert alert-success');
-            				    $('#message').html("Reserva realizada correctamente.");
-
-        				    }
-        				    
-    				    }
-    				});
-		    });
-		    });
+			var gridcell = null;
+			//Initial ajax call for the grid to be loaded
+			$.ajax({
+			    type: 'GET',
+			    url: 'ajax/data.php',
+			    dataType: "json",
+			    data: {
+				      'action' : 'getbooking',
+				      'type' : $('#buttonsRooms').attr('typeRoom'),
+				      'campusid' : $('#buttonsRooms').attr('campus'),
+				      'date' : $('#buttonsRooms').attr('initialDate'),
+				      'multiply' : $('#buttonsRooms').attr('advOptions'),
+				      'size' : $('#buttonsRooms').attr('size'),
+				      'finalDate' : $('#buttonsRooms').attr('endDate'),
+				      'days' : $('#buttonsRooms').attr('selectDays'),
+				      'frequency' : $('#buttonsRooms').attr('weeklyFrequencyBookings')
+			    	},
+			    success: function (response) {
+				    var modulos = response.values.Modulos;
+				    var salas = response.values.Salas;
+				  	//Today date
+				    var d = new Date(); 
+				  	//Format the date to get the hour and minutes.
+				    var date = addZero(d.getHours())+":"+addZero(d.getMinutes());
+				    //var to save the html content for the grid
+				    var content = "";
+				   	for (var i = 0; i <= salas.length; i++) {
+			            for (var j = 0; j <= modulos.length; j++) {
+				            //First Column, first row
+			                if (j==0 && i == 0){
+			                	content += "<table class='table table-bordered  table-hover table-light' style='text-align: center;>";
+	                			content += "<thead>";
+            					content += "<th scope='col'></th>";
+            					content += "<th scope='col'></th>";
+			                }
+							//First row, last column
+			                else if (i == 0 && j == modulos) {
+			                	content += "<th scope='col'>Modulo: "+ modulos[j-1].name +"</th>";
+			                	content += "</tr>";
+			                	content += "</thead>";
+			                	content += "<tbody>";
+			                }
+							//First row, every other column
+			                else if (i == 0) {
+			                	content += "<th scope='col'>Modulo: "+ modulos[j-1].name +"</th>";
+					        }
+							//First column
+					        else if (j == 0) {
+			                	content += "<tr><th scope='row' >Sala: "+salas[i-1].nombresala +"</th>";
+				            } 
+				            //Last column
+				            else if (j === modulos) {
+					            //Check availability
+					            if(salas[i-1].disponibilidad[j-1].ocupada == 1 || date > modulos[j-1].horaFin && today === thisdate){
+					            	content += "<td class='table-danger disabled'>";
+					            }else{
+			                    	content += "<td class='table-success' data-toggle='modal' data-target='#myModal' id='"+modulos[j-1].id+salas[i-1].salaid+"' moduloid='" +modulos[j-1].id+"' modulo='" +modulos[j-1].name+"' sala='"+ salas[i-1].nombresala +"' salaid='"+ salas[i-1].salaid +"'>";
+					            }
+								content += "<b>"+ salas[i-1].nombresala +"</b>";
+		                    	content += "<i>";
+		                    	content += "<small>["+modulos[j-1].horaInicio + " - " +modulos[j-1].horaFin+"]</small>";
+		                    	content += "</i>";
+		                    	content += "</td>";
+		                    	content += "</tr>";
+			                } 
+			                //Every other row x cloumn
+			                else {
+				                //Check availability
+			                	if(salas[i-1].disponibilidad[j-1].ocupada == 1 || date > modulos[j-1].horaFin && today === thisdate){
+					            	content += "<td  class='table-danger disabled'>";
+			                	}else{
+			                    	content += "<td class='table-success' data-toggle='modal' data-target='#myModal' id='"+modulos[j-1].id+salas[i-1].salaid+"' moduloid='" +modulos[j-1].id+"' modulo='" +modulos[j-1].name+"' sala='"+ salas[i-1].nombresala +"' salaid='"+ salas[i-1].salaid +"'>";
+			                	}
+				            	content += "<b>"+ salas[i-1].nombresala +"</b>";
+				            	content += "<i>";
+				            	content += "<small>["+modulos[j-1].horaInicio + " - " +modulos[j-1].horaFin+"]</small>";
+				            	content += "</i>";
+				            	content += "</td>";
+			                }
+			            }
+			        }
+			        content += "</tbody>";
+			        content += "</table>";
+			        //End of grid content
+			        //Modal html content
+			        content += "<div class='modal fade' id='myModal' role='dialog'>";
+			        	content += "<div class='modal-dialog'>";
+			        		content += "<div class='modal-content'>";
+			        			content += "<div class='modal-header'>";
+			        				content += "<h4 class='modal-title'>Confirmar Reserva</h4>";
+			        			content += "</div>";
+			        			content += "<div class='modal-body'></div>";
+			        			content += "<div class='modal-footer'></div>";
+			        				content += "<button type='button' id='confirmar' class='btn btn-primary'>Confirmar</button>";
+			        				content += "<button type='button' class='btn btn-default' data-dismiss='modal'>Cancelar</button>";
+			        			content += "</div>";
+			        		content += "</div>";
+			        	content += "</div>";
+			        content += "</div>";
+			        //End modal content
+			        //Load content
+			        $("#grids").html(content);
+			        $("#grids").on("click", ".table-success", function() {
+			        	gridcell = $(this);
+					    //Save &(this) for code efficiency
+					    //Dinamically add content to modal
+				        $("div.modal-body").html("¿Desea reservar la Sala:"+ $(this).attr('sala')+" para el modulo:" + $(this).attr('modulo') + 
+					        					"? <br><br>Nombre del evento:<input id=nombreevento type='text' name='member' value=''> "+
+					        					"<br><br>Numero de participantes(2-6):<select id='numeroparticipantes'>"+
+					        					  "<option value='2'>2</option>"+
+					        					  "<option value='3'>3</option>"+
+					        					  "<option value='4'>4</option>"+
+					        					  "<option value='5'>5</option>"+
+					        					  "<option value='6'>6</option>"+
+					        					"</select>"+
+					        					"<input id=modalmoduloid type='hidden' value='"+$(this).attr('moduloid')+"'>"+
+					        					"<input id=modalsalaid type='hidden' value='"+$(this).attr('salaid')+"'>");
+				    });
+					//Confirmation ajax
+	            	$("#confirmar").on("click", function() {
+	    	        	if($('#nombreevento').val() != ''){
+	    	        		$('#myModal').modal('hide');
+	        		    	$.ajax({
+	        				    type: 'GET',
+	        				    url: 'ajax/data.php',
+	        				    dataType: "json",
+	        				    data: {
+	    					      	'action' : 'submission',
+	    					      	'room' : $('#modalsalaid').val(),
+	    					      	'moduleid' : $('#modalmoduloid').val(),
+	        		    			'date' : $('#buttonsRooms').attr('initialDate'),
+	        		    			'campusid' : $('#buttonsRooms').attr('campus'),
+	        		    			'multiply' : $('#buttonsRooms').attr('advOptions'),
+	        		    			'finalDate' : $('#buttonsRooms').attr('endDate'),
+	        		    			'days' : $('#buttonsRooms').attr('selectDays'),
+	        		    			'frequency' : $('#buttonsRooms').attr('weeklyFrequencyBookings'),
+	        		    			'event' : $('#nombreevento').val(),
+	    	    					'asistants' : $('#numeroparticipantes').val()
+	        				    	},
+	        				    success: function (response) {
+	            				    console.log(response);
+	            				    //Check if successfully saved
+	            				    if(response.error.length > 0 && $('#buttonsRooms').attr('advOptions') == 0){
+	            				    	$('#message').addClass('alert alert-danger');
+	                				    $('#message').html("No puedes realizar más reservas.");
+	            				    }else{
+	            				    	gridcell.removeClass('table-success');
+	            				    	gridcell.addClass('table-danger');
+	            				    	gridcell.removeAttr('data-toggle');
+	            				    	gridcell.removeAttr('data-target');
+	                				    $('#message').addClass('alert alert-success');
+	                				    $('#message').html("Reserva realizada correctamente.");
+	            				    }
+	            				    
+	        				    }
+	        				});
+	    	        	}else{
+	    					$('#nombreevento').addClass('alert-danger');
+	    	        	}
+					});
+			    }
+			});
 		});
 		</script>
 		<?php 

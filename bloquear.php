@@ -118,7 +118,7 @@ if($action == 'view'){
                 $lastname = '<strike>'.$usuario->lastname.'</strike>';
                 $username = '<strike>'.$usuario->username.'</strike>';
             }else{
-                $action = $OUTPUT->single_button(new moodle_url($url, array('action'=>'block', 'id'=>$usuario->id)), get_string('block','local_reservasalas'));
+                $action = $OUTPUT->single_button(new moodle_url($url, array('action'=>'block', 'id'=>$usuario->id, 'search' =>$search)), get_string('block','local_reservasalas'));
                 $firstname = $usuario->firstname;
                 $lastname = $usuario->lastname;
                 $username = $usuario->username;

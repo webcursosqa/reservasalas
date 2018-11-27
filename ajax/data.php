@@ -44,7 +44,8 @@ $enddate = optional_param("finalDate", 1, PARAM_INT);
 $days = optional_param("days", null, PARAM_TEXT);
 $frequency = optional_param("frequency", 0, PARAM_INT);
 $roomname = optional_param("nombresala", null, PARAM_TEXT);
-
+$event = optional_param("event", null, PARAM_TEXT);
+$asistants = optional_param("asistants", null, PARAM_INT);
 // Callback para from webpage
 $callback = optional_param ( "callback", null, PARAM_RAW_TRIMMED );
 
@@ -147,7 +148,7 @@ else if($action == "info"){
 						&& ($CFG->reservasSemana - $weekBookings - count($room)+1) < 0) ){
 			$validation = false;
 		}else{
-			$validation = true;
+		    $validation = true;
 		}
 	}else{
 		$validation = true;
@@ -168,8 +169,8 @@ else if($action == "info"){
             $data->alumno_id = $USER->id;
             $data->salas_id = $room;
             $data->fecha_creacion = time();
-            $data->nombre_evento = $USER->firstname.' '.$USER->lastname.' estudio';
-            $data->asistentes = 0;
+            $data->nombre_evento = $event;
+            $data->asistentes = $asistants;
             
             $lastinsertid = $DB->insert_record("reservasalas_reservas", $data,true);
             if($lastinsertid > 0){
@@ -195,11 +196,11 @@ else if($action == "info"){
     }
     $context = context_system::instance ();
     $PAGE->set_context ( $context );
-    reservasalas_sendMail($values, $error, $USER->id, 0, $USER->firstname.' '.$USER->lastname.' estudio', $campusid);
+    reservasalas_sendMail($values, $error, $USER->id, $asistants, $event, $campusid);
     
     $jsonOutputs = array (
-        "error" => "",
-        "values" => $values
+        "error" => $error,
+        "values" => $validation
     );
 }
 $jsonOutput = json_encode ( $jsonOutputs );

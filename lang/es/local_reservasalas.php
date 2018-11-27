@@ -10,7 +10,6 @@
 local/reservasalas.php
 */
 
-
 $string['activateadvanceoptions'] = 'Activar opciones avanzadas';
 $string['addend'] = 'Agregar final';
 $string['adjustments'] = 'Ajustes';
