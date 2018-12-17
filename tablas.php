@@ -341,36 +341,53 @@ class tablas{
 		
 		
 		$table = new html_table();
-		$table->head = array(get_string('campus', 'local_reservasalas'), get_string('building', 'local_reservasalas'),get_string('room', 'local_reservasalas'), get_string('event', 'local_reservasalas'), get_string('reservedate', 'local_reservasalas'), get_string('createdate', 'local_reservasalas'), get_string('usercharge', 'local_reservasalas'),get_string('module', 'local_reservasalas'),
-				html_writer::checkbox("","0",false,'',array('onClick'=>'checkAll()','id'=>'check')));
+		$table->head = array(
+		    get_string('campus', 'local_reservasalas'),
+		    get_string('building', 'local_reservasalas'),
+		    get_string('room', 'local_reservasalas'), 
+		    get_string('event', 'local_reservasalas'), 
+		    get_string('reservedate', 'local_reservasalas'), 
+		    get_string('createdate', 'local_reservasalas'), 
+		    get_string('usercharge', 'local_reservasalas'),
+		    get_string('module', 'local_reservasalas'),
+		    get_string('actions', 'local_reservasalas')
+        );
+		list ( $sqlin, $tableinfoparams ) = $DB->get_in_or_equal ( $data );
+		$tableinfoquery = "SELECT rr.id as id,
+                            rr.nombre_evento as nombre,
+                            rr.fecha_reserva as reserva, 
+                            rr.fecha_creacion as creacion, 
+                            rr.asistentes as asistentes,
+                            rss.nombre as sede,
+                            re.nombre as edificio,
+                            rs.nombre as sala,
+                            u.firstname as firstname,
+                            u.lastname as lastname,
+                            rm.nombre_modulo as modulo
+                            FROM {reservasalas_reservas} AS rr
+                            INNER JOIN {reservasalas_salas} AS rs ON (rr.salas_id = rs.id)
+                            INNER JOIN {reservasalas_edificios} AS re ON (rs.edificios_id = re.id)
+                            INNER JOIN {reservasalas_sedes} AS rss ON (re.sedes_id = rss.id)
+                            INNER JOIN {user} AS u ON (u.id = rr.alumno_id)
+                            INNER JOIN {reservasalas_modulos} as rm ON (rm.id = rr.modulo)
+                            WHERE rr.id $sqlin"; 
+		$data = $DB->get_records_sql($tableinfoquery,$tableinfoparams);
 		
-		$i=0;	
+		$url = new moodle_url('/local/reservasalas/search.php');
 	foreach($data as $info){
 		
-		$sala=$DB->get_record('reservasalas_salas',array('id'=>$info->salas_id));
-		$edificio=$DB->get_record('reservasalas_edificios',array('id'=>$sala->edificios_id));
-		$sede=$DB->get_record('reservasalas_sedes',array('id'=>$edificio->sedes_id));
-		
-			$nombre_evento=$info->nombre_evento;
-			$fechaR=$info->fecha_reserva;
-			$fechaC=$info->fecha_creacion;
-			$fechaC=date("Y-m-d",$fechaC);
-			$asistentes=$info->asistentes;
-			$usuario=$DB->get_record('user',array('id'=>$info->alumno_id));
-			
-			
-			$modulo=$DB->get_record('reservasalas_modulos',array('id'=>$info->modulo));
-			
-			 
-		$table->data[] = array($sede->nombre,$edificio->nombre,$sala->nombre,$nombre_evento,$fechaR,$fechaC, $usuario->firstname.' '.$usuario->lastname,
-		$modulo->nombre_modulo,html_writer::checkbox("check_list[".$i."]",$info->id,false,'',array('class'=>'check')));
-		$i++;
+			$table->data[] = array(
+			     $info->sede,
+			     $info->edificio,
+			     $info->sala,
+			     $info->nombre,
+			     $info->reserva,
+			     date("Y-m-d",$info->creacion),
+		         $info->firstname.' '.$info->lastname,
+		         $info->modulo,
+			    $OUTPUT->single_button(new moodle_url($url, array('action'=>'remove', 'id'=>$info->id)), get_string('remove','local_reservasalas'))
+			);
 	}
-	
-	
-		
-		
-
 		$table->size = array('8%', '8%','8%','23%','10%','10%','20%','5%','3%');
 		return $table;
 	}

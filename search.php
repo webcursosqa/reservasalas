@@ -33,7 +33,8 @@ require_once($CFG->dirroot.'/local/reservasalas/lib.php');
 require_once($CFG->dirroot.'/local/reservasalas/tablas.php');
 
 global $DB,$USER;
-$params = Array();
+
+$action = optional_param('action', 'ver', PARAM_TEXT);
 
 $baseurl = new moodle_url('/local/reservasalas/search.php'); //importante para crear la clase pagina
 $context = context_system::instance();
@@ -47,211 +48,128 @@ $PAGE->navbar->add(get_string('roomsreserve', 'local_reservasalas'));
 $PAGE->navbar->add(get_string('searchroom', 'local_reservasalas'),'search.php');
 
 echo  $OUTPUT->header(); //Imprime el header
-$action = optional_param('action', 'ver', PARAM_TEXT);
+
 if($action=="ver"){
 echo $OUTPUT->heading(get_string('searchroom', 'local_reservasalas'));
 $buscador = new roomSearch();
-$buscador->get_data();
 $buscador->display();
 $condition = '0';
 if($fromform = $buscador->get_data()){
-	
-	$select ='1=1 ';
-	
-	$date=$fromform->startdate;
-	$date=date("Y-m-d",$date);
-	
-	$endDate=$fromform->enddate;
-	$multiple=$fromform->addmultiply;
-	
-	
-	if($multiple == 0){
-		$select.="AND fecha_reserva='$date'";
-		
-	}else if($multiple == 1){
-		
-	
-		$fecha1=mktime(0,0,0,date("m", $fromform->startdate),date("d", $fromform->startdate),date("Y", $fromform->startdate));
-		$fecha2=mktime(0,0,0,date("m", $fromform->enddate),date("d", $fromform->enddate),date("Y", $fromform->enddate));
-		$diferencia=$fecha2-$fecha1;
-		$dias=$diferencia/(60*60*24)+1;
-		//$dow   = $arreglo[$f];
-	
-		$step  = 1;
-		$unit  = 'D';
-	
-		$start = new DateTime($date);
-		$end   = clone $start; // ¿?
-		
-		//$start->modify($dow); // Move to first occurence
-		$dias=intval($dias);
-		
-		$end->add(new DateInterval('P'.$dias.'D')); // Move to 1 year from start
-	
-		$interval = new DateInterval("P{$step}{$unit}");
-		$period   = new DatePeriod($start, $interval, $end);
-	
-		foreach ($period as $date) {
-			$repetir[]= "'".$date->format('Y-m-d')."'";
-				
-		}
-		$repetir=implode(",",$repetir);
-		$select.="AND fecha_reserva in($repetir) ";
-	
-	
-	}
-	
-	if(isset($fromform->name)){
-		//$select.="AND nombre_evento like '%$fromform->name%' ";
-		$select.= "AND ".$DB->sql_like('nombre_evento', ':nombre_evento')." ";
-		$params['nombre_evento'] = "$fromform->name";
-		
-	}
+    $params = Array();
+    $DB->set_debug(true);
+	$date=date("Y-m-d",$fromform->startdate);
+	$endDate=date("Y-m-d",$fromform->enddate);
+
+	$select =" fecha_reserva >= ? AND fecha_reserva <= ? ";
+	$params = array(
+	    $date,
+	    $endDate
+	);
 	if($fromform->responsable){
-		
 		// search by user email		
-		if( $user=$DB->get_record("user",array("email"=>$fromform->responsable)) ){
-			$select.="AND alumno_id='$user->id' ";
+		$userselect= $DB->sql_like('username', ':search1' , $casesensitive = false, $accentsensitive = false, $notlike = false).'
+                    OR '.$DB->sql_like('firstname', ':search2' , $casesensitive = false, $accentsensitive = false, $notlike = false).'
+                    OR '.$DB->sql_like('lastname', ':search3' , $casesensitive = false, $accentsensitive = false, $notlike = false);
+		$userparams = array(
+		    'search1'=>$fromform->responsable,
+		    'search2'=>$fromform->responsable,
+		    'search3'=>$fromform->responsable
+		);
+		if( $users=$DB->get_fieldset_select("user",'id',$userselect, $userparams) ){
+		    list ( $usersqlin, $userparams ) = $DB->get_in_or_equal ( $users );
+		    $select.="AND alumno_id $usersqlin";
+		    $params = array_merge($params,$userparams);
 		}	
 	}
 	
-	$id_salas=array();
 	if(isset($fromform->campus)){
-		$campus=$fromform->campus;
-		$h=count($campus);
-		
-		if($h=!0){
-			$h=$h-1;
-		}
-		if($fromform->eventType==0 && $fromform->roomsname==null){
-		
-			
-		for($i=0;$i<=$h;$i++){
-		$salas=$DB->get_records('reservasalas_salas',array('edificios_id'=>$campus[$i]));
-		foreach($salas as $sala){
-			$id_salas[]="'".$sala->id."'";
-			
-		}
-		}
-		if(empty($id_salas)){
-			
-			$condition = '1';
-		}
-		}
-		else if($fromform->eventType!=0 && $fromform->roomsname==null){
-			
-			for($i=0;$i<=$h;$i++){
-				$salas=$DB->get_records('reservasalas_salas',array('edificios_id'=>$campus[$i],'tipo'=>$fromform->eventType));
-				foreach($salas as $sala){
-					$id_salas[]="'".$sala->id."'";
-						
-				}
-			}
-			if(empty($id_salas)){
-					
-				$condition = '1';
-			}
-		}
-		else if($fromform->eventType!=0 && $fromform->roomsname!=null){
-			
-			for($i=0;$i<=$h;$i++){
-				$salas=$DB->get_records('reservasalas_salas',array('edificios_id'=>$campus[$i],'tipo'=>$fromform->eventType,'nombre'=>$fromform->roomsname));
-				foreach($salas as $sala){
-					$id_salas[]="'".$sala->id."'";
-			
-				}
-			}
-			if(empty($id_salas)){
-					
-				$condition = '1';
-			}
-		}
-		else if($fromform->eventType==0 && $fromform->roomsname!=null){
-		
-			for($i=0;$i<=$h;$i++){
-				$salas=$DB->get_records('reservasalas_salas',array('edificios_id'=>$campus[$i],'nombre'=>$fromform->roomsname));
-				foreach($salas as $sala){
-					$id_salas[]="'".$sala->id."'";
-						
-				}
-			}
-			if(empty($id_salas)){
-					
-				$condition = '1';
-			}
-		}
-	
-		if (!empty($id_salas)){
-		$string_id_salas=implode(",",$id_salas);
-	
-	$select.="AND salas_id in ($string_id_salas) ";
-		}
-	}	
-elseif($fromform->eventType!=0){
-
-	if($fromform->roomsname!=null){
-		
-		$salas=$DB->get_records('reservasalas_salas',array('tipo'=>$fromform->eventType,'nombre'=>$fromform->roomsname));
-		foreach($salas as $sala){
-		$id_salas[]="'".$sala->id."'";
-			
-		}
-		if(empty($id_salas)){
-				
-			$condition = '1';
-		}
-	}else{
-		
-		$salas=$DB->get_records('reservasalas_salas',array('tipo'=>$fromform->eventType));
-		foreach($salas as $sala){
-			$id_salas[]="'".$sala->id."'";
-				
-		}
-			
-	if(empty($id_salas)){
-			
-			$condition = '1';
-		}
+	    // set the buildings ids ready for the query
+	    list ( $edificiosqlin, $edificioparams ) = $DB->get_in_or_equal ( $fromform->campus );
+	    
+        if($fromform->eventType==0 && $fromform->roomsname==null){
+            $salas=$DB->get_fieldset_select('reservasalas_salas','id','edificios_id '.$edificiosqlin,$edificioparams);
+            
+        }
+        else if($fromform->eventType!=0 && $fromform->roomsname==null){
+            $salasparam = array_merge($edificioparams,array($fromform->eventType));
+            $salas=$DB->get_fieldset_select('reservasalas_salas','id','edificios_id '.$edificiosqlin.' AND tipo = ?',$salasparam);
+            
+        }
+        else if($fromform->eventType!=0 && $fromform->roomsname!=null){
+            $salasselect = 'edificios_id '.$edificiosqlin.' 
+                            AND tipo = ? 
+                            AND '.$DB->sql_like('nombre', '?' , $casesensitive = false, $accentsensitive = false, $notlike = false);
+            
+            $salasparam = array_merge($edificioparams,array($fromform->eventType,"%$fromform->roomsname%"));
+            $salas=$DB->get_fieldset_select('reservasalas_salas','id',$salasselect ,$salasparam);
+            
+        }
+        else if($fromform->eventType==0 && $fromform->roomsname!=null){
+            $salasselect = 'edificios_id '.$edificiosqlin.'
+                            AND '.$DB->sql_like('nombre', '?' , $casesensitive = false, $accentsensitive = false, $notlike = false);
+            
+            $salasparam = array_merge($edificioparams,array("%$fromform->roomsname%"));
+            $salas=$DB->get_fieldset_select('reservasalas_salas','id',$salasselect ,$salasparam);
+            
+        }
+        
+        if (!empty($salas)){
+            list ( $salassqlin, $salasparam ) = $DB->get_in_or_equal ( $salas );
+            $select.="AND salas_id $salassqlin ";
+            $params = array_merge($params,$salasparam);
+            
+        }else{
+            $condition = '1';
+            
+        }
 	}
-	
-		
-		if (!empty($id_salas)){
-	
-		$string_id_salas=implode(",",$id_salas);
-	
-		$select.="AND salas_id in ($string_id_salas) ";
-		}
-		
-}
+	elseif($fromform->eventType!=0){
+	    
+    	if($fromform->roomsname!=null){
+    	    $salasselect = 'tipo = ?
+                            AND '.$DB->sql_like('nombre', '?' , $casesensitive = false, $accentsensitive = false, $notlike = false);
+    	    $salas=$DB->get_fieldset_select('reservasalas_salas','id',$salasselect,array($fromform->eventType,"%$fromform->roomsname%"));
+    	    
+    	}else{
+    	    $salas=$DB->get_fieldset_select('reservasalas_salas','id','tipo = ?',array($fromform->eventType));
+    	}
+    	
+    		
+    	if (!empty($salas)){
+    	    list ( $salassqlin, $salasparam ) = $DB->get_in_or_equal ( $salas );
+    	    $select.="AND salas_id $salassqlin ";
+    	    $params = array_merge($params,$salasparam);
+    	    
+    	}else{
+    	    $condition = '1';
+    	    
+    	}
+    }
 	elseif($fromform->roomsname!=null){
+	    $salasselect = $DB->sql_like('nombre', '?' , $casesensitive = false, $accentsensitive = false, $notlike = false);
+	    $salas=$DB->get_fieldset_select('reservasalas_salas','id',$salasselect,array("%$fromform->roomsname%"));
 		
-		$salas=$DB->get_records('reservasalas_salas',array('nombre'=>$fromform->roomsname));
-		foreach($salas as $sala){
-			$id_salas[]="'".$sala->id."'";
-				
-		}
-		if(empty($id_salas)){
-				
-			$condition = '1';
-		}
-	if (!empty($id_salas)){
-		$string_id_salas=implode(",",$id_salas);
-	
-	$select.="AND salas_id in ($string_id_salas) ";
-		}
+	    if (!empty($salas)){
+	        list ( $salassqlin, $salasparam ) = $DB->get_in_or_equal ( $salas );
+	        $select.="AND salas_id $salassqlin ";
+	        $params = array_merge($params,$salasparam);
+	        
+	    }else{
+	        $condition = '1';
+	        
+	    }
 	}
 	$select.="AND activa=1";
 	//$result = $DB->get_records_select('reservasalas_reservas',$select);
-	$result = $DB->get_records_select('reservasalas_reservas',$select,$params);
+	$result = $DB->get_fieldset_select('reservasalas_reservas','id',$select,$params);
 	if(empty($result) || $condition == 1){ // $condition=1 significa que no hay salas
-		
 		echo '<h5>'.get_string('noreservesarefound', 'local_reservasalas').'</h5>';
 		
 	}else{
 	
 	$table = tablas::searchRooms($result);
 	
-	echo html_writer::tag('<form','',array('name'=>'search','method'=>'POST'));
+	echo html_writer::tag('form','',array('name'=>'search','method'=>'POST'));
 	
 	echo html_writer::table($table);
 	if(has_capability('local/reservasalas:delete', $context)) {

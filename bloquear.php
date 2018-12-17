@@ -89,56 +89,56 @@ if($action == 'block'){
 if($action == 'view'){
     //Formulario para bloquear a un alumno
     $form = new buscadorUsuario(null);
+    $dom = $form->display();
     if($fromform = $form->get_data()){
         $search = $fromform->email;
-    }
-    $query = 'Select u.id, u.username, u.firstname, u.lastname, MAX(rb.estado) as estado
-                from mdl_user as u
-                left join mdl_reservasalas_bloqueados as rb on (u.id = rb.alumno_id)
-                where '.$DB->sql_like('username', ':search1' , $casesensitive = false, $accentsensitive = false, $notlike = false).'
-                OR '.$DB->sql_like('firstname', ':search2' , $casesensitive = false, $accentsensitive = false, $notlike = false).'
-                OR '.$DB->sql_like('lastname', ':search3' , $casesensitive = false, $accentsensitive = false, $notlike = false).'
-                group by u.id';
-	//Bloquea al usuario en la base de datos
-    if($usuarios = $DB->get_records_sql($query,array('search1'=>$search, 'search2'=>$search, 'search3'=>$search))){
-        $countblock = $DB->count_records_sql($query,array('search1'=>$search, 'search2'=>$search, 'search3'=>$search));
-        $table = new html_table();
-        $table->head = array(
-            '#',
-            get_string('name','local_reservasalas'),
-            get_string('lastname','local_reservasalas'),
-            get_string('email','local_reservasalas'),
-            get_string('action','local_reservasalas')
-        );
-        $counter = $page * $perpage + 1;
-        foreach($usuarios as $usuario){
-            if($usuario->estado == 1){
-                $action = '<strike>'.get_string('blocked','local_reservasalas').'</strike>';
-                $firstname = '<strike>'.$usuario->firstname.'</strike>';
-                $lastname = '<strike>'.$usuario->lastname.'</strike>';
-                $username = '<strike>'.$usuario->username.'</strike>';
-            }else{
-                $action = $OUTPUT->single_button(new moodle_url($url, array('action'=>'block', 'id'=>$usuario->id, 'search' =>$search)), get_string('block','local_reservasalas'));
-                $firstname = $usuario->firstname;
-                $lastname = $usuario->lastname;
-                $username = $usuario->username;
-            }
-            $table->data[] = array(
-                $counter,
-                $firstname,
-                $lastname,
-                $username,
-                $action
+
+        $query = 'Select u.id, u.username, u.firstname, u.lastname, MAX(rb.estado) as estado
+                    from mdl_user as u
+                    left join mdl_reservasalas_bloqueados as rb on (u.id = rb.alumno_id)
+                    where '.$DB->sql_like('username', ':search1' , $casesensitive = false, $accentsensitive = false, $notlike = false).'
+                    OR '.$DB->sql_like('firstname', ':search2' , $casesensitive = false, $accentsensitive = false, $notlike = false).'
+                    OR '.$DB->sql_like('lastname', ':search3' , $casesensitive = false, $accentsensitive = false, $notlike = false).'
+                    group by u.id';
+        //Bloquea al usuario en la base de datos
+        if($usuarios = $DB->get_records_sql($query,array('search1'=>$search, 'search2'=>$search, 'search3'=>$search))){
+            $countblock = $DB->count_records_sql($query,array('search1'=>$search, 'search2'=>$search, 'search3'=>$search));
+            $table = new html_table();
+            $table->head = array(
+                '#',
+                get_string('name','local_reservasalas'),
+                get_string('lastname','local_reservasalas'),
+                get_string('email','local_reservasalas'),
+                get_string('action','local_reservasalas')
             );
-            $counter++;
+            $counter = $page * $perpage + 1;
+            foreach($usuarios as $usuario){
+                if($usuario->estado == 1){
+                    $action = '<strike>'.get_string('blocked','local_reservasalas').'</strike>';
+                    $firstname = '<strike>'.$usuario->firstname.'</strike>';
+                    $lastname = '<strike>'.$usuario->lastname.'</strike>';
+                    $username = '<strike>'.$usuario->username.'</strike>';
+                }else{
+                    $action = $OUTPUT->single_button(new moodle_url($url, array('action'=>'block', 'id'=>$usuario->id, 'search' =>$search)), get_string('block','local_reservasalas'));
+                    $firstname = $usuario->firstname;
+                    $lastname = $usuario->lastname;
+                    $username = $usuario->username;
+                }
+                $table->data[] = array(
+                    $counter,
+                    $firstname,
+                    $lastname,
+                    $username,
+                    $action
+                );
+                $counter++;
+            }
+            $dom .= html_writer::table($table);
+            $dom .= $OUTPUT->paging_bar(round($countblock/$perpage), $page, $perpage,
+                $CFG->wwwroot . '/local/reservasalas/desbloquear.php?action=' . $action . '&search=' . $search . '&page=');
+        }else{
+            $dom .= html_writer::div(get_string('nouser','local_reservasalas'), 'alert alert-warning');
         }
-        $dom = $form->display();
-        $dom .= html_writer::table($table);
-        $dom .= $OUTPUT->paging_bar(round($countblock/$perpage), $page, $perpage,
-            $CFG->wwwroot . '/local/reservasalas/desbloquear.php?action=' . $action . '&search=' . $search . '&page=');
-    }else{
-        $dom = $form->display();
-        $dom .= html_writer::div(get_string('nouser','local_reservasalas'), 'alert alert-warning');
     }
     
     echo $dom;

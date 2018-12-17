@@ -1094,32 +1094,17 @@ class roomSearch extends moodleform  {
 		global $DB, $USER;
 		
 		$mform =& $this->_form;
-	    $mform->addElement('header','', '');
 		$mform->addElement('header','expanded', get_string('date', 'local_reservasalas')." and ".get_string('event','local_reservasalas'));
 		$mform->addElement('date_selector', 'startdate', get_string('startdate','local_reservasalas'),array(
     					'startyear' => date('Y')-2, 
     					'stopyear'  => date('Y')+2,
 						));
-		$mform->addElement('advcheckbox', 'addmultiply', '',get_string('addend', 'local_reservasalas'));
 		$mform->addElement('date_selector', 'enddate', get_string('enddate','local_reservasalas'),array(
-    					'startyear' => date('Y'), 
-    					'stopyear'  => date('Y')+3,
+            		    'startyear' => date('Y')-2,
+            		    'stopyear'  => date('Y')+2,
 						));
-		$mform->disabledIf('enddate', 'addmultiply', 'notchecked');
-		
-        $options = array(
-				'1' => '1',
-				'2' => '2',
-				'3' => '3',
-				'4' => '4',
-				'5' => '5',
-				'6' => '6',
-				'7' => '7',
-				'8' => '8');
-        $mform->addElement('advcheckbox', 'more', '',get_string('event','local_reservasalas'));
+        $mform->addElement('advcheckbox', 'more', '',get_string('userfilter','local_reservasalas'));
         
-        $mform->addElement('text', 'name', get_string('eventName','local_reservasalas'));
-		$mform->setType('name', PARAM_TEXT);
 		$mform->addElement('text', 'responsable', get_string('usercharge', 'local_reservasalas').': ');
 		$mform->setType('responsable', PARAM_TEXT);
 		$mform->setDefault('responsable', "user@alumnos.uai.cl");
@@ -1151,12 +1136,10 @@ class roomSearch extends moodleform  {
 	function validation($data,$files) {
 		global $DB;
 		$errors=array();
-	if($data['addmultiply']==1){
 		if(  $data['startdate'] > $data['enddate']){
 			
 			$errors['enddate'] = get_string('datecannot', 'local_reservasalas');
 		}
-	}
 		return $errors;
 	}
 }
