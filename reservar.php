@@ -198,9 +198,9 @@ if ($form_buscar->is_cancelled()) {
 				            else if (j === modulos) {
 					            //Check availability
 					            if(salas[i-1].disponibilidad[j-1].ocupada == 1 || date > modulos[j-1].horaFin && today === thisdate){
-					            	content += "<td class='table-danger disabled'>";
+					            	content += "<td class='alert-danger disabled'>";
 					            }else{
-			                    	content += "<td class='table-success' data-toggle='modal' data-target='#myModal' id='"+modulos[j-1].id+salas[i-1].salaid+"' moduloid='" +modulos[j-1].id+"' modulo='" +modulos[j-1].name+"' sala='"+ salas[i-1].nombresala +"' salaid='"+ salas[i-1].salaid +"'>";
+			                    	content += "<td class='alert-success' data-toggle='modal' data-target='#myModal' id='"+modulos[j-1].id+salas[i-1].salaid+"' moduloid='" +modulos[j-1].id+"' modulo='" +modulos[j-1].name+"' sala='"+ salas[i-1].nombresala +"' salaid='"+ salas[i-1].salaid +"'>";
 					            }
 								content += "<b>"+ salas[i-1].nombresala +"</b>";
 		                    	content += "<i>";
@@ -213,9 +213,9 @@ if ($form_buscar->is_cancelled()) {
 			                else {
 				                //Check availability
 			                	if(salas[i-1].disponibilidad[j-1].ocupada == 1 || date > modulos[j-1].horaFin && today === thisdate){
-					            	content += "<td  class='table-danger disabled'>";
+					            	content += "<td  class='alert-danger disabled'>";
 			                	}else{
-			                    	content += "<td class='table-success' data-toggle='modal' data-target='#myModal' id='"+modulos[j-1].id+salas[i-1].salaid+"' moduloid='" +modulos[j-1].id+"' modulo='" +modulos[j-1].name+"' sala='"+ salas[i-1].nombresala +"' salaid='"+ salas[i-1].salaid +"'>";
+			                    	content += "<td class='alert-success' data-toggle='modal' data-target='#myModal' id='"+modulos[j-1].id+salas[i-1].salaid+"' moduloid='" +modulos[j-1].id+"' modulo='" +modulos[j-1].name+"' sala='"+ salas[i-1].nombresala +"' salaid='"+ salas[i-1].salaid +"'>";
 			                	}
 				            	content += "<b>"+ salas[i-1].nombresala +"</b>";
 				            	content += "<i>";
@@ -246,7 +246,7 @@ if ($form_buscar->is_cancelled()) {
 			        //End modal content
 			        //Load content
 			        $("#grids").html(content);
-			        $("#grids").on("click", ".table-success", function() {
+			        $("#grids").on("click", ".alert-success", function() {
 			        	gridcell = $(this);
 					    //Save &(this) for code efficiency
 					    //Dinamically add content to modal
@@ -290,8 +290,8 @@ if ($form_buscar->is_cancelled()) {
 	            				    	$('#message').addClass('alert alert-danger');
 	                				    $('#message').html("No puedes realizar más reservas.");
 	            				    }else{
-	            				    	gridcell.removeClass('table-success');
-	            				    	gridcell.addClass('table-danger');
+	            				    	gridcell.removeClass('alert-success');
+	            				    	gridcell.addClass('alert-danger');
 	            				    	gridcell.removeAttr('data-toggle');
 	            				    	gridcell.removeAttr('data-target');
 	                				    $('#message').addClass('alert alert-success');
