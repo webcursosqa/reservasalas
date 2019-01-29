@@ -102,9 +102,7 @@ if($action == 'view'){
                     group by u.id';
         //Bloquea al usuario en la base de datos
         if($usuarios = $DB->get_records_sql($query,array('search1'=>"%$search%", 'search2'=>"%$search%", 'search3'=>"%$search%"))){
-            print_r($usuarios);
             $countblock = count($usuarios);
-            print_r($countblock);
             $table = new html_table();
             $table->head = array(
                 '#',
