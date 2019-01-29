@@ -91,7 +91,7 @@ if($action == 'view'){
                 OR '.$DB->sql_like('firstname', ':search2' , $casesensitive = false, $accentsensitive = false, $notlike = false).'
                 OR '.$DB->sql_like('lastname', ':search3' , $casesensitive = false, $accentsensitive = false, $notlike = false).')';
     if($bloqueados = $DB->get_records_sql($query, array("estado" => 1, "search1" => "%$search%","search2" => "%$search%","search3" => "%$search%"), $page * $perpage, $perpage)){
-        $countblock = $DB->count_records_sql('Select count(id) from {reservasalas_bloqueados} where estado = ?', array(1));
+        $countblock = count($bloqueados);
         $table = new html_table();
         $table->head = array(
             '#',

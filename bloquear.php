@@ -101,8 +101,10 @@ if($action == 'view'){
                     OR '.$DB->sql_like('lastname', ':search3' , $casesensitive = false, $accentsensitive = false, $notlike = false).'
                     group by u.id';
         //Bloquea al usuario en la base de datos
-        if($usuarios = $DB->get_records_sql($query,array('search1'=>$search, 'search2'=>$search, 'search3'=>$search))){
-            $countblock = $DB->count_records_sql($query,array('search1'=>$search, 'search2'=>$search, 'search3'=>$search));
+        if($usuarios = $DB->get_records_sql($query,array('search1'=>"%$search%", 'search2'=>"%$search%", 'search3'=>"%$search%"))){
+            print_r($usuarios);
+            $countblock = count($usuarios);
+            print_r($countblock);
             $table = new html_table();
             $table->head = array(
                 '#',
@@ -140,7 +142,6 @@ if($action == 'view'){
             $dom .= html_writer::div(get_string('nouser','local_reservasalas'), 'alert alert-warning');
         }
     }
-    
     echo $dom;
     echo $OUTPUT->footer();
 }
