@@ -36,6 +36,8 @@ global $DB,$USER;
 
 $action = optional_param('action', 'ver', PARAM_TEXT);
 $reservaid = optional_param('reservaid', null, PARAM_INT);
+$startdate = optional_param('startdate', null, PARAM_TEXT);
+$enddate = optional_param('enddate', null, PARAM_TEXT);
 $responsable = optional_param('responsable', null, PARAM_TEXT);
 $campus = optional_param('campus', 0, PARAM_INT);
 $eventtype = optional_param('eventtype', 0, PARAM_INT);
@@ -81,22 +83,24 @@ if($action=="ver"){
     $buscador->display();
     $condition = '0';
     if($fromform = $buscador->get_data()){
+        $startdate  = $fromform->startdate;
+        $enddate = $fromform->enddate;
         $responsable = $fromfrom->responsable;
         $campus = $formform->campus;
         $eventtype = $formform->eventType;
         $roomsname = $formform->roomsname;
     }
-    if(isset($fromform)){
+    if($startdate != null && $enddate != null){
         $params = Array();
-    	$date=date("Y-m-d",$fromform->startdate);
-    	$endDate=date("Y-m-d",$fromform->enddate);
+        $date=date("Y-m-d",$startdate);
+    	$endDate=date("Y-m-d",$enddate);
     
     	$select =" fecha_reserva >= ? AND fecha_reserva <= ? ";
     	$params = array(
     	    $date,
     	    $endDate
     	);
-    	if($fromform->responsable != null){
+    	if($responsable != null){
     		// search by user email		
     		$userselect= $DB->sql_like('username', ':search1' , $casesensitive = false, $accentsensitive = false, $notlike = false).'
                         OR '.$DB->sql_like('firstname', ':search2' , $casesensitive = false, $accentsensitive = false, $notlike = false).'
@@ -113,20 +117,20 @@ if($action=="ver"){
     		}	
     	}
     	
-    	if($fromform->campus > 0){
+    	if($campus > 0){
     	    // set the buildings ids ready for the query
     	    list ( $edificiosqlin, $edificioparams ) = $DB->get_in_or_equal ( $fromform->campus );
     	    
-            if($fromform->eventType==0 && $fromform->roomsname==null){
+    	    if($eventtype==0 && $roomsname==null){
                 $salas=$DB->get_fieldset_select('reservasalas_salas','id','edificios_id '.$edificiosqlin,$edificioparams);
                 
             }
-            else if($fromform->eventType!=0 && $fromform->roomsname==null){
+            else if($eventtype!=0 && $roomsname==null){
                 $salasparam = array_merge($edificioparams,array($fromform->eventType));
                 $salas=$DB->get_fieldset_select('reservasalas_salas','id','edificios_id '.$edificiosqlin.' AND tipo = ?',$salasparam);
                 
             }
-            else if($fromform->eventType!=0 && $fromform->roomsname!=null){
+            else if($eventtype!=0 && $roomsname!=null){
                 $salasselect = 'edificios_id '.$edificiosqlin.' 
                                 AND tipo = ? 
                                 AND '.$DB->sql_like('nombre', '?' , $casesensitive = false, $accentsensitive = false, $notlike = false);
@@ -135,7 +139,7 @@ if($action=="ver"){
                 $salas=$DB->get_fieldset_select('reservasalas_salas','id',$salasselect ,$salasparam);
                 
             }
-            else if($fromform->eventType==0 && $fromform->roomsname!=null){
+            else if($eventtype && $roomsname!=null){
                 $salasselect = 'edificios_id '.$edificiosqlin.'
                                 AND '.$DB->sql_like('nombre', '?' , $casesensitive = false, $accentsensitive = false, $notlike = false);
                 
@@ -197,7 +201,65 @@ if($action=="ver"){
     		echo '<h5>'.get_string('noreservesarefound', 'local_reservasalas').'</h5>';
     		
     	}else{
-    	   echo html_writer::table(tablas::searchRooms($result));
+    	    $table = new html_table();
+    	    $table->head = array(
+    	        get_string('campus', 'local_reservasalas'),
+    	        get_string('building', 'local_reservasalas'),
+    	        get_string('room', 'local_reservasalas'),
+    	        get_string('event', 'local_reservasalas'),
+    	        get_string('reservedate', 'local_reservasalas'),
+    	        get_string('createdate', 'local_reservasalas'),
+    	        get_string('usercharge', 'local_reservasalas'),
+    	        get_string('module', 'local_reservasalas'),
+    	        get_string('actions', 'local_reservasalas')
+    	    );
+    	    list ( $sqlin, $tableinfoparams ) = $DB->get_in_or_equal ( $data );
+    	    $tableinfoquery = "SELECT rr.id as id,
+                            rr.nombre_evento as nombre,
+                            rr.fecha_reserva as reserva,
+                            rr.fecha_creacion as creacion,
+                            rr.asistentes as asistentes,
+                            rss.nombre as sede,
+                            re.nombre as edificio,
+                            rs.nombre as sala,
+                            u.firstname as firstname,
+                            u.lastname as lastname,
+                            rm.nombre_modulo as modulo
+                            FROM {reservasalas_reservas} AS rr
+                            INNER JOIN {reservasalas_salas} AS rs ON (rr.salas_id = rs.id)
+                            INNER JOIN {reservasalas_edificios} AS re ON (rs.edificios_id = re.id)
+                            INNER JOIN {reservasalas_sedes} AS rss ON (re.sedes_id = rss.id)
+                            INNER JOIN {user} AS u ON (u.id = rr.alumno_id)
+                            INNER JOIN {reservasalas_modulos} as rm ON (rm.id = rr.modulo)
+                            WHERE rr.id $sqlin";
+    	    $data = $DB->get_records_sql($tableinfoquery,$tableinfoparams);
+    	    $parameters = array(
+    	        'action'=>'remove',
+    	        'startdate'=>$startdate,
+    	        'enddate'=>$enddate,
+    	        'responsable'=>$responsable,
+    	        'campus'=>$campus,
+    	        'eventtype'=>$eventtype,
+    	        'roomsname'=>$roomsname
+    	    );
+    	    $url = new moodle_url('/local/reservasalas/search.php');
+    	    foreach($data as $info){
+    	        
+    	        $table->data[] = array(
+    	            $info->sede,
+    	            $info->edificio,
+    	            $info->sala,
+    	            $info->nombre,
+    	            $info->reserva,
+    	            date("Y-m-d",$info->creacion),
+    	            $info->firstname.' '.$info->lastname,
+    	            $info->modulo,
+    	            $OUTPUT->single_button(new moodle_url($url, array('action'=>'remove','startdate'=>$startdate,'enddate'=>$enddate,'responsable'=>$responsable,'campus'=>$campus,'eventtype'=>$eventtype,'roomsname'=>$roomsname)), get_string('remove','local_reservasalas')).
+    	            $OUTPUT->single_button(new moodle_url($url, array('action'=>'edit','startdate'=>$startdate,'enddate'=>$enddate,'responsable'=>$responsable,'campus'=>$campus,'eventtype'=>$eventtype,'roomsname'=>$roomsname)), get_string('edit','local_reservasalas'))
+    	        );
+    	    }
+    	    $table->size = array('8%', '8%','8%','23%','10%','10%','20%','5%','3%');
+    	    return $table;
     	}
 	}
 }
