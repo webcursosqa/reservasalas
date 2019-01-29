@@ -1114,7 +1114,7 @@ class roomSearch extends moodleform  {
 		
 		$mform->addElement('header','notexpandedtwo', get_string('room','local_reservasalas'));
 		
-	    $sedeedificio = array();
+	    $sedeedificio = array('');
 		$edificios = $DB->get_records('reservasalas_edificios');
 		foreach ($edificios as $edificio){
 			$sede = $DB->get_record('reservasalas_sedes', array('id'=>$edificio->sedes_id));
@@ -1122,7 +1122,6 @@ class roomSearch extends moodleform  {
 		}
 	
 		$select = $mform->addElement('select', 'campus', get_string('choose_buildings','local_reservasalas'),$sedeedificio);
-		$select->setMultiple(true);
 		$options = array(
 				'0'=>' ',
 				'1'=>get_string('class', 'local_reservasalas'),
