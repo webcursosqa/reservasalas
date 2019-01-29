@@ -68,7 +68,7 @@ if($action=="remove"){
         
     }
     if(count($DB->get_record('reservasalas_reservas',array('id' => $reservaid))) > 0){
-        $DB->delete_record('reservasalas_reservas', array ('id'=>$reservaid));
+        $DB->delete_records('reservasalas_reservas', array ('id'=>$reservaid));
         echo html_writer::div(get_string('reserveseliminated','local_reservasalas'), 'alert alert-success');
         
     }else{
@@ -213,7 +213,7 @@ if($action=="ver"){
     	        get_string('module', 'local_reservasalas'),
     	        get_string('actions', 'local_reservasalas')
     	    );
-    	    list ( $sqlin, $tableinfoparams ) = $DB->get_in_or_equal ( $data );
+    	    list ( $sqlin, $tableinfoparams ) = $DB->get_in_or_equal ( $result );
     	    $tableinfoquery = "SELECT rr.id as id,
                             rr.nombre_evento as nombre,
                             rr.fecha_reserva as reserva,
@@ -254,12 +254,12 @@ if($action=="ver"){
     	            date("Y-m-d",$info->creacion),
     	            $info->firstname.' '.$info->lastname,
     	            $info->modulo,
-    	            $OUTPUT->single_button(new moodle_url($url, array('action'=>'remove','startdate'=>$startdate,'enddate'=>$enddate,'responsable'=>$responsable,'campus'=>$campus,'eventtype'=>$eventtype,'roomsname'=>$roomsname)), get_string('remove','local_reservasalas')).
-    	            $OUTPUT->single_button(new moodle_url($url, array('action'=>'edit','startdate'=>$startdate,'enddate'=>$enddate,'responsable'=>$responsable,'campus'=>$campus,'eventtype'=>$eventtype,'roomsname'=>$roomsname)), get_string('edit','local_reservasalas'))
+    	            $OUTPUT->single_button(new moodle_url($url, array('action'=>'remove','reservaid'=>$info->id,'startdate'=>$startdate,'enddate'=>$enddate,'responsable'=>$responsable,'campus'=>$campus,'eventtype'=>$eventtype,'roomsname'=>$roomsname)), get_string('remove','local_reservasalas')).
+    	            $OUTPUT->single_button(new moodle_url($url, array('action'=>'edit','reservaid'=>$info->id,'startdate'=>$startdate,'enddate'=>$enddate,'responsable'=>$responsable,'campus'=>$campus,'eventtype'=>$eventtype,'roomsname'=>$roomsname)), get_string('edit','local_reservasalas'))
     	        );
     	    }
     	    $table->size = array('8%', '8%','8%','23%','10%','10%','20%','5%','3%');
-    	    return $table;
+    	    echo html_writer::table($table);
     	}
 	}
 }
