@@ -181,7 +181,14 @@ function block_update($user_id)
 		//the latest book
 		$book = end($books);
 
-		$unixtime = strtotime($book->fecha_reserva);
+		//get the time of the reserve
+		$module = $book->modulo;
+		$book_time = $DB->get_record("reservasalas_modulos", array("id" => $module));
+		
+		$time = $book_time->hora_inicio;
+		$date = $book->fecha_reserva;
+
+		$unixtime = strtotime($date . " " . $time);
 
 		//if more than 15m since the book have passed (the book is not confirmed)
 		//and if less than 3d since the book
