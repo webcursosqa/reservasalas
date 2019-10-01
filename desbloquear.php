@@ -64,20 +64,24 @@ echo $OUTPUT->header();
 echo $OUTPUT->heading($title);
 
 if($action == 'unblock'){
-    if(!$id > 0){
-        print_error(get_string('invalidid','local_reservasalas'));
+    if ($id < 0) {
+        print_error(get_string('invalidid', 'local_reservasalas'));
     }
-    $userblock = new stdClass();
-    $userblock->id = $id;
-    $userblock->estado = 0;
-    if($unblock = $DB->update_record('reservasalas_bloqueados',$userblock)){
-        echo html_writer::div(get_string('unblocked','local_reservasalas'), 'alert alert-success');
-        $action = 'view';
-    }else{
-        print_error(get_string('failtounblock','local_reservasalas'));
+
+    if($block = $DB->get_record("reservasalas_bloqueados", array("id" => $id, "estado" => 1)))
+    {
+        $block->estado = 0;
+        if ($DB->update_record("reservasalas_bloqueados", $block)){
+            echo html_writer::div(get_string('unblocked', 'local_reservasalas'), 'alert alert-success');
+            $action = 'view';
+        } else {
+            print_error(get_string('failtounblock', 'local_reservasalas'));
+        }
     }
 }
 if($action == 'view'){
+    block_update_all();
+
     $form = new desbloquearAlumnoForm();
     if($data = $form->get_data()){
         $search = $data->search;

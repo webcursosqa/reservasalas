@@ -118,21 +118,102 @@ function booking_availability($date){
 	return $books;
 }
 
-function reservasalas_modal_rules() {
-	return '<div id="myModal" class="modal fade" role="dialog" style="width: 75%; margin-left: -35%; z-index: -10;display:none;">
-  				<div class="modal-dialog">
-				    <div class="modal-content">
-      					<div class="modal-header">
-        					<button type="button" class="close" data-dismiss="modal">&times;</button>
-        					<h4 class="modal-title">'.get_string("rules_title", "local_reservasalas").'</h4>
-      					</div>
-      					<div class="modal-body">
-        					<p>'.get_string("rules_content", "local_reservasalas").'</p>
-      					</div>
-      					<div class="modal-footer">
-	        				<button type="button" class="btn btn-default" data-dismiss="modal">'.get_string("close", "local_reservasalas").'</button>
-    	  				</div>
-    				</div>
-  				</div>
-			</div>';
+function block_update_all() 
+{
+	global $DB;
+
+	//get all users currently blocked for unblocking
+	$users_blocked = $DB->get_records("reservasalas_bloqueados", array("estado" => 0));
+
+	//get all non-confirmed books for blocking
+	$non_confirmed_books = $DB->get_records("reservasalas_reservas", array("confirmado" => 0));
+
+	$ids = array();
+
+	foreach ($users_blocked as $user_blocked) {
+		$id = $user_blocked->id;
+		if(!in_array($id, $ids)) {
+			$ids[] = $id;
+		}
+	}
+
+	foreach($non_confirmed_books as $non_confirmed_book) {
+		$id = $non_confirmed_book->alumno_id;
+		if(!in_array($id, $ids)) {
+			$ids[] = $id;
+		}
+	}
+
+	//check all ids
+	foreach($ids as $id) {
+		block_update($id);
+	}
+}
+
+function block_update($user_id)
+{
+	//we can do one of 3 things
+	//block user (add record to blocks)
+	//	-done when missed
+	//unblock user (remove record)
+	//	-3 days after block
+	//this last scenario can happen if a user misses twice or is blocked manually, etc
+	global $DB;
+
+	$currentTime = time();
+
+	$table = "reservasalas_reservas";
+	$conditions = array("alumno_id" => $user_id, "confirmado" => 0);
+	$books_exist = $DB->record_exists($table, $conditions);
+
+	$table = "reservasalas_bloqueados";
+	$conditions = array("alumno_id" => $user_id, "estado" => 1);
+	$block_exists = $DB->record_exists($table, $conditions);
+
+	//if currently unblocked
+	//check if needs to be blocked
+	if ($books_exist and !$block_exists) 
+	{
+		$table = "reservasalas_reservas";
+		$conditions = array("alumno_id" => $user_id, "confirmado" => 0);
+		$sort = "fecha_reserva ASC";
+		$books = $DB->get_records($table, $conditions, $sort);
+		//the latest book
+		$book = end($books);
+
+		$unixtime = strtotime($book->fecha_reserva);
+
+		//if more than 15m since the book have passed (the book is not confirmed)
+		//and if less than 3d since the book
+		//and if there isnt a block already for that book
+		if (
+			$unixtime + (15 * 60) < $currentTime and
+			$unixtime + (3 * 24 * 60 * 60) > $currentTime and
+			!$DB->get_record("reservasalas_bloqueados", array("id_reserva" => $book->id))
+		) {
+			$block = new stdClass();
+			$block->fecha_bloqueo = $book->fecha_reserva;
+			$block->id_reserva = $book->id;
+			$block->estado = 1;
+			$block->comentarios = "Default block by failure to confirm";
+			$block->alumno_id = $user_id;
+			$DB->insert_record("reservasalas_bloqueados", $block);
+		}
+	}
+	//unblock user, if user is blocked currently
+	//update user, if blocked currently and reblocked
+	else if ($block_exists) {
+		$table = 'reservasalas_bloqueados';
+		$conditions = array("alumno_id" => $user_id, "estado" => 1);
+		$block = $DB->get_record($table, $conditions);
+
+		$block_date = $block->fecha_bloqueo;
+
+		//if 3 days have passed
+		if (strtotime($block_date) + (3 * 24 * 60 * 60) < $currentTime) {
+			$block->estado = 0;
+			echo "Blocked more than 3 days ago, deleting record for user id $user_id <br>";
+			$DB->update_record($table, $block);
+		}
+	}
 }

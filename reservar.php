@@ -97,6 +97,7 @@ if ($form_buscar->is_cancelled()) {
 				$fromform->fr ['frequency'] = 1;
 		}
 		
+		block_update($USER->id);
 		list($weekBookings,$todayBookings) = booking_availability($fromform->fecha);
 		
 		$moodleurl = $CFG->wwwroot . '/local/reservasalas/ajax/data.php';

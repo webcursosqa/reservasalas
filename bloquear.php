@@ -69,24 +69,28 @@ echo $OUTPUT->header();
 echo $OUTPUT->heading($title);
 
 if($action == 'block'){
-    if(!$id > 0){
-        print_error(get_string('invalidid','local_reservasalas'));
+    //how would this even happen?
+    if (!$id > 0) {
+        print_error(get_string('invalidid', 'local_reservasalas'));
     }
+    //create new block
     $userblock = new stdClass();
-    $userblock->fecha_bloqueo = date("Y-m-d",time());
+    $userblock->fecha_bloqueo = date("Y-m-d", time());
     $userblock->id_reserva = null;
     $userblock->estado = 1;
-    $userblock->comentario = null;
+    $userblock->comentario = "Admin block";
     $userblock->alumno_id = $id;
     
-    if($block = $DB->insert_record('reservasalas_bloqueados',$userblock, true)){
-        echo html_writer::div(get_string('blocked','local_reservasalas'), 'alert alert-success');
+    if ($DB->insert_record("reservasalas_bloqueados", $userblock)) {
+        echo html_writer::div(get_string('blocked', 'local_reservasalas'), 'alert alert-success');
         $action = 'view';
-    }else{
-        print_error(get_string('failtounblock','local_reservasalas'));
+    } else {
+        print_error(get_string('failtounblock', 'local_reservasalas'));
     }
 }
 if($action == 'view'){
+    block_update_all();
+
     //Formulario para bloquear a un alumno
     $form = new buscadorUsuario(null);
     $dom = $form->display();
