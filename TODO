@@ -1,5 +1,6 @@
-Front end:
--Dont allow booking past start of hour
--Fix first row bug
+Front end: (reservar.php)
+-Dont allow booking past start of hour [DONE] 
+-Fix first row bug [DONE]
 -Dont allow 2 bookings at the same hour
--Allow 6 weekly bookings
+-Fix weekly limit ignored
+-New error messages for simultaneous book, maximum books and blocked user
