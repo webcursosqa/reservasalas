@@ -73,18 +73,14 @@ if($action == 'block'){
     if (!$id > 0) {
         print_error(get_string('invalidid', 'local_reservasalas'));
     }
-    //create new block
-    $userblock = new stdClass();
-    $userblock->fecha_bloqueo = date("Y-m-d", time());
-    $userblock->id_reserva = null;
-    $userblock->estado = 1;
-    $userblock->comentario = "Admin block";
-    $userblock->alumno_id = $id;
-    
-    if ($DB->insert_record("reservasalas_bloqueados", $userblock)) {
+
+    if (block($id, null, get_string("bloquear-comment", "local_reservasalas"))) 
+    {
         echo html_writer::div(get_string('blocked', 'local_reservasalas'), 'alert alert-success');
         $action = 'view';
-    } else {
+    } 
+    else 
+    {
         print_error(get_string('failtounblock', 'local_reservasalas'));
     }
 }

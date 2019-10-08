@@ -119,25 +119,47 @@ function booking_availability($date){
 	return $books;
 }
 
+//not used for anything yet
+//returns success
+function block($student_id, $book_id, $reason) {
+	global $DB;
+	
+    //unblock if blocked
+    if($block = is_blocked($student_id)) {
+        $block->estado = 0;
+        $DB->update_record("reservasalas_bloqueados", $block);
+    }
+    
+    //create new block
+    $block = new stdClass();
+    $block->fecha_bloqueo = date("Y-m-d", time());
+    $block->id_reserva = $book_id;
+    $block->estado = 1;
+    $block->comentarios = $reason;
+    $block->alumno_id = $student_id;
+    
+	if ($DB->insert_record("reservasalas_bloqueados", $block)) 
+	{
+		return true;
+	} 
+	else 
+	{
+		return false;
+    }
+}
+
+//returns the entire block object
 function is_blocked($student) {
 	global $DB;
 
 	$table = 'reservasalas_bloqueados';
 	$conditions = array("alumno_id" => $student, "estado" => 1);
 	if($block = $DB->get_record($table, $conditions)) {
-		return $block->comentarios;
+		return $block;
 	}
 	else {
 		return false;
 	} 
-}
-
-function block($user_id) {
-
-}
-
-function unblock($user_id) {
-	
 }
 
 function block_update_all() 
@@ -223,13 +245,7 @@ function block_update($user_id)
 			$unixtime + (3 * 24 * 60 * 60) > $currentTime and
 			!$DB->get_record("reservasalas_bloqueados", array("id_reserva" => $book->id))
 		) {
-			$block = new stdClass();
-			$block->fecha_bloqueo = $book->fecha_reserva;
-			$block->id_reserva = $book->id;
-			$block->estado = 1;
-			$block->comentarios = get_string("no-confirm", "local_reservasalas");
-			$block->alumno_id = $user_id;
-			$DB->insert_record("reservasalas_bloqueados", $block);
+			block($user_id, $book->id, get_string("no-confirm", "local_reservasalas"));
 		}
 	}
 	//unblock user, if user is blocked currently

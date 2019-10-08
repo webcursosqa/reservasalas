@@ -145,28 +145,36 @@ if ($action == "getbooking") {
 	$validation = false;
 
 	//if not admin
-	if (!has_capability("local/reservasalas:advancesearch", context_system::instance())) {
+	if (!has_capability("local/reservasalas:advancesearch", context_system::instance())) 
+	{
 		list($weekBookings, $todayBookings) = booking_availability($initialDate);
 
-		if($reason = is_blocked($USER->id)) {
-			$response = get_string("data-blocked-for-reason", "local_reservasalas"). $reason;
+		if($reason = is_blocked($USER->id)->comentarios) 
+		{
+			$response = get_string("data-blocked-for-reason", "local_reservasalas") . $reason;
 		}
-		else if ($todayBookings == $CFG->reservasDia) {
+		else if ($todayBookings == $CFG->reservasDia) 
+		{
 			$response = get_string("data-max-daily-books", "local_reservasalas");
 		} 
-		else if ($weekBookings == $CFG->reservasSemana) {
+		else if ($weekBookings == $CFG->reservasSemana) 
+		{
 			$response = get_string("data-max-weekly-books", "local_reservasalas");
 		}
 		//what the hell is this even? a weird way to check against the max books?
 		else if (
 			$CFG->reservasDia - $todayBookings - count($room) + 1 < 0 &&
-			$CFG->reservasSemana - $weekBookings - count($room) + 1 < 0
-		) {
+			$CFG->reservasSemana - $weekBookings - count($room) + 1 < 0) 
+		{
 			$response = get_string("data-internal-error", "local_reservasalas");
-		} else {
+		} 
+		else 
+		{
 			$validation = true;
 		}
-	} else { //if admin
+	} 
+	else //if admin
+	{ 
 		$validation = true;
 	}
 

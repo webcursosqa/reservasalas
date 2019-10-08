@@ -352,6 +352,9 @@ $string['filter'] = "Filter";
 $string['nouser'] = "No users were found";
 $string['blocked'] = 'Blocked';
 
+//admin block
+$string['bloquear-comment'] = "Blocked by administrator";
+
 //default block reason for no confirm
 $string['no-confirm'] = "Failure to confirm";
 
