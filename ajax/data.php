@@ -1,4 +1,4 @@
-<?php 
+<?php
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -26,9 +26,9 @@
 define("AJAX_SCRIPT", true);
 define("NO_DEBUG_DISPLAY", true);
 
-require_once(dirname(dirname(dirname(dirname(__FILE__))))."/config.php");
+require_once(dirname(dirname(dirname(dirname(__FILE__)))) . "/config.php");
 require_once("qry/querylib.php");
-require_once ($CFG->dirroot . "/local/reservasalas/lib.php");
+require_once($CFG->dirroot . "/local/reservasalas/lib.php");
 global $CFG, $DB, $OUTPUT, $USER;
 require_login();
 
@@ -47,14 +47,14 @@ $roomname = optional_param("nombresala", null, PARAM_TEXT);
 $event = optional_param("event", null, PARAM_TEXT);
 $asistants = optional_param("asistants", null, PARAM_INT);
 // Callback para from webpage
-$callback = optional_param ( "callback", null, PARAM_RAW_TRIMMED );
+$callback = optional_param("callback", null, PARAM_RAW_TRIMMED);
 
 // Headers
-header ( "Content-Type: text/javascript" );
-header ( "Cache-Control: no-cache" );
-header ( "Pragma: no-cache" );
+header("Content-Type: text/javascript");
+header("Cache-Control: no-cache");
+header("Pragma: no-cache");
 
-if($action == "getbooking"){
+if ($action == "getbooking") {
 	$output = reservasalas_getBooking($type, $campusid, $initialDate, $multiply, $size, $enddate, $days, $frequency);
 	$available = array();
 	$modules = array();
@@ -65,7 +65,7 @@ if($action == "getbooking"){
 	$roomsadded = array();
 	$contador = 0;
 	foreach ($output as $availability) {
-		if(!in_array($availability->moduloid, $added)){
+		if (!in_array($availability->moduloid, $added)) {
 			$added[] = $availability->moduloid;
 			$modules[] = array(
 				"id" => $availability->moduloid,
@@ -74,19 +74,19 @@ if($action == "getbooking"){
 				"horaFin" => $availability->modulofin
 			);
 		}
-		if($contador > 0){
-			if($anterior != $availability->salaid){
+		if ($contador > 0) {
+			if ($anterior != $availability->salaid) {
 				$rooms[] = array(
-						"salaid" => $salaid,
-						"nombresala" => $roomname,
-						"capacidad" => $capacidad,
-						"disponibilidad" => $roombusy
+					"salaid" => $salaid,
+					"nombresala" => $roomname,
+					"capacidad" => $capacidad,
+					"disponibilidad" => $roombusy
 				);
 				$roombusy = array();
 			}
 		}
 		$contador++;
-		if(!in_array($availability->salaid, $roomsadded)){
+		if (!in_array($availability->salaid, $roomsadded)) {
 			$anterior = $availability->salaid;
 			$roomsadded[] = $availability->salaid;
 			$salaid = $availability->salaid;
@@ -94,117 +94,141 @@ if($action == "getbooking"){
 			$capacidad = $availability->capacidad;
 		}
 		$roombusy[] = array(
-				"moduloid" => $availability->moduloid,
-				"modulonombre" => $availability->modulonombre,
-				"ocupada" => $availability->ocupada,
-				"horaInicio" => $availability->moduloinicio,
-				"horaFin" => $availability->modulofin
+			"moduloid" => $availability->moduloid,
+			"modulonombre" => $availability->modulonombre,
+			"ocupada" => $availability->ocupada,
+			"horaInicio" => $availability->moduloinicio,
+			"horaFin" => $availability->modulofin
 		);
 	}
-	
+
 	$output->close();
-	
+
 	$rooms[] = array(
-			"salaid" => $salaid,
-			"nombresala" => $roomname,
-			"capacidad" => $capacidad,
-			"disponibilidad" => $roombusy
+		"salaid" => $salaid,
+		"nombresala" => $roomname,
+		"capacidad" => $capacidad,
+		"disponibilidad" => $roombusy
 	);
 	$final = array(
-			"Modulos" => $modules,
-			"Salas" => $rooms
+		"Modulos" => $modules,
+		"Salas" => $rooms
 	);
 	$output = $final;
-	$jsonOutputs = array (
-			"error" => "",
-	    "values" => $output
+	$jsonOutputs = array(
+		"error" => "",
+		"values" => $output
 	);
-}
-else if($action == "info"){
+} else if ($action == "info") {
 	// 0 = false, 1 = true
 	$isAdmin = 0;
-	if ( has_capability ( "local/reservasalas:advancesearch", context_system::instance() )){
+	if (has_capability("local/reservasalas:advancesearch", context_system::instance())) {
 		$isAdmin = 1;
 	}
 	$infoUser = array(
-			"firstname" => $USER->firstname,
-			"lastname" => $USER->lastname,
-			"email" => $USER->email,
-			"isAdmin" => $isAdmin
+		"firstname" => $USER->firstname,
+		"lastname" => $USER->lastname,
+		"email" => $USER->email,
+		"isAdmin" => $isAdmin
 	);
-	$jsonOutputs = array (
-			"error" => "",
-			"values" => $infoUser
+	$jsonOutputs = array(
+		"error" => "",
+		"values" => $infoUser
 	);
-}else if($action == "submission"){
+} else if ($action == "submission") {
+	if ($CFG->reservasDia == null)
+		$CFG->reservasDia = 2;
+	if ($CFG->reservasSemana == null)
+		$CFG->reservasSemana = 6;
 
-	$error= array();
-	$values = array();
-	if(!has_capability ( "local/reservasalas:advancesearch", context_system::instance () )){
-		list($weekBookings,$todayBookings) = booking_availability($initialDate);
-		if( $todayBookings == 2 
-				|| count($room)>3 
-				|| ( (($CFG->reservasDia - $todayBookings - count($room) + 1) < 0) 
-						&& ($CFG->reservasSemana - $weekBookings - count($room)+1) < 0) ){
-			$validation = false;
-		}else{
-		    $validation = true;
+	$response = get_string("data-default-error");
+	$validation = false;
+
+	//if not admin
+	if (!has_capability("local/reservasalas:advancesearch", context_system::instance())) {
+		list($weekBookings, $todayBookings) = booking_availability($initialDate);
+
+		if($reason = is_blocked($USER->id)) {
+			$response = get_string("data-blocked-for-reason", "local_reservasalas"). $reason;
 		}
-	}else{
+		else if ($todayBookings == $CFG->reservasDia) {
+			$response = get_string("data-max-daily-books", "local_reservasalas");
+		} 
+		else if ($weekBookings == $CFG->reservasSemana) {
+			$response = get_string("data-max-weekly-books", "local_reservasalas");
+		}
+		//what the hell is this even? a weird way to check against the max books?
+		else if (
+			$CFG->reservasDia - $todayBookings - count($room) + 1 < 0 &&
+			$CFG->reservasSemana - $weekBookings - count($room) + 1 < 0
+		) {
+			$response = get_string("data-internal-error", "local_reservasalas");
+		} else {
+			$validation = true;
+		}
+	} else { //if admin
 		$validation = true;
 	}
-	$reservas = array();
-	if($multiply == 1 && has_capability ( "local/reservasalas:advancesearch", context_system::instance () )){
-	    $fechas = reservasalas_daysCalculator($initialDate,$enddate,$days,$frequency);
-	}else{
-	    $fechas = array(date("Y-m-d",$initialDate));
+
+	//if its admin
+	if ($multiply == 1 && has_capability("local/reservasalas:advancesearch", context_system::instance())) {
+		$fechas = reservasalas_daysCalculator($initialDate, $enddate, $days, $frequency);
+	} else {
+		$fechas = array(date("Y-m-d", $initialDate));
 	}
-    foreach($fechas as $fecha){
-        if( reservasalas_validationBooking($room,$moduleid,$fecha) && $validation){
-            $data = new stdClass();
-            $data->fecha_reserva = $fecha;
-            $data->modulo = $moduleid;
-            $data->confirmado = 0;
-            $data->activa = 1;
-            $data->alumno_id = $USER->id;
-            $data->salas_id = $room;
-            $data->fecha_creacion = time();
-            $data->nombre_evento = $event;
-            $data->asistentes = $asistants;
-            
-            $lastinsertid = $DB->insert_record("reservasalas_reservas", $data,true);
-            if($lastinsertid > 0){
-                $values[]=array(
-                    "sala" => $room,
-                    "modulo" => $moduleid,
-                    "fecha" => $fecha
-                );
-            }else{
-                $error[] = array(
-                    "sala" => $room,
-                    "modulo" => $moduleid,
-                    "fecha" => $fecha
-                );
-            }
-        }else{
-            $error[] = array(
-                "sala" => $room,
-                "modulo" => $moduleid,
-                "fecha" => $fecha
-            );
-        }
-    }
-    $context = context_system::instance ();
-    $PAGE->set_context ( $context );
-    reservasalas_sendMail($values, $error, $USER->id, $asistants, $event, $campusid);
-    
-    $jsonOutputs = array (
-        "error" => $error,
-        "values" => $validation
-    );
+
+	$error = array();
+	$values = array();
+
+	if ($validation) {
+		foreach ($fechas as $fecha) {
+			//actually do the booking
+			if (reservasalas_validationBooking($room, $moduleid, $fecha)) {
+				$data = new stdClass();
+				$data->fecha_reserva = $fecha;
+				$data->modulo = $moduleid;
+				$data->confirmado = 0;
+				$data->activa = 1;
+				$data->alumno_id = $USER->id;
+				$data->salas_id = $room;
+				$data->fecha_creacion = time();
+				$data->nombre_evento = $event;
+				$data->asistentes = $asistants;
+
+				$lastinsertid = $DB->insert_record("reservasalas_reservas", $data, true);
+				if ($lastinsertid > 0) {
+					$response = "success";
+					$values[] = array(
+						"sala" => $room,
+						"modulo" => $moduleid,
+						"fecha" => $fecha
+					);
+				} else {
+					$response = get_string("data-internal-error", "local_reservasalas");
+					$error[] = array(
+						"sala" => $room,
+						"modulo" => $moduleid,
+						"fecha" => $fecha
+					);
+				}
+			} else {
+				$response = get_string("data-already-booked", "reservasalas");
+				$error[] = array(
+					"sala" => $room,
+					"modulo" => $moduleid,
+					"fecha" => $fecha
+				);
+			}
+		}
+	}
+	$context = context_system::instance();
+	$PAGE->set_context($context);
+	reservasalas_sendMail($values, $error, $USER->id, $asistants, $event, $campusid);
+
+	$jsonOutputs = $response;
 }
-$jsonOutput = json_encode ( $jsonOutputs );
-if ($callback){
+$jsonOutput = json_encode($jsonOutputs);
+if ($callback) {
 	$jsonOutput = $callback . "(" . $jsonOutput . ");";
 }
 echo $jsonOutput;

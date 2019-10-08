@@ -351,4 +351,15 @@ $string['searchuser'] = "User email filter";
 $string['filter'] = "Filter";
 $string['nouser'] = "No users were found";
 $string['blocked'] = 'Blocked';
+
+//default block reason for no confirm
+$string['no-confirm'] = "Failure to confirm";
+
+//reservar ui answers for failure
+$string['data-default-error'] = "Could not book the room";
+$string['data-blocked-for-reason'] = "Blocked by reason: ";
+$string['data-max-daily-books'] = "Maximum daily bookings";
+$string['data-max-weekly-books'] = "Maximum weekly bookings";
+$string['data-internal-error'] = "Internal error";
+$string['data-already-booked'] = "Room already booked";
 ?>

@@ -98,15 +98,8 @@ if ($form_buscar->is_cancelled()) {
 		}
 		
 		block_update($USER->id);
-		list($weekBookings,$todayBookings) = booking_availability($fromform->fecha);
 		
 		$moodleurl = $CFG->wwwroot . '/local/reservasalas/ajax/data.php';
-		
-		//Booking preferences for basic users
-		if ($CFG->reservasDia == null)
-			$CFG->reservasDia = 2;
-		if ($CFG->reservasSemana == null)
-			$CFG->reservasSemana = 6;
 		
 		//Javascript,CSS and DIV for GWT
 		?>
@@ -117,10 +110,6 @@ if ($form_buscar->is_cancelled()) {
 			initialDate = "<?php echo $fromform->fecha; ?>"
 			typeRoom= "<?php echo $fromform->roomstype; ?>"
 			campus = "<?php echo $fromform->SedeEdificio; ?>"
-			userDayReservations = "<?php echo $todayBookings; ?>"
-			userWeeklyBooking = "<?php echo $weekBookings; ?>"
-			maxDailyBookings = "<?php echo $CFG->reservasDia; ?>"
-			maxWeeklyBookings = "<?php echo $CFG->reservasSemana; ?>"	
 			size = "<?php echo $fromform->size; ?>"
  			endDate = "<?php echo $fromform->enddate; ?>"
  			selectDays = "<?php echo $days; ?>"
@@ -304,21 +293,21 @@ if ($form_buscar->is_cancelled()) {
 	        		    			'event' : $('#nombreevento').val(),
 	    	    					'asistants' : $('#numeroparticipantes').val()
 	        				    	},
+									//check for success
 	        				    success: function (response) {
-	            				    console.log(response);
-	            				    //Check if successfully saved
-	            				    if(response.error.length > 0 && $('#buttonsRooms').attr('advOptions') == 0){
-	            				    	$('#message').addClass('alert alert-danger');
-	                				    $('#message').html("No puedes realizar más reservas.");
-	            				    }else{
+									if(response == "success") {
 	            				    	gridcell.removeClass('alert-success');
 	            				    	gridcell.addClass('alert-danger');
 	            				    	gridcell.removeAttr('data-toggle');
 	            				    	gridcell.removeAttr('data-target');
 	                				    $('#message').addClass('alert alert-success');
 	                				    $('#message').html("Reserva realizada correctamente.");
-	            				    }
-	            				    
+									}
+									else {
+	            				    	$('#message').addClass('alert alert-danger');
+										//work here for different error messahes
+	                				    $('#message').html(response);
+									}
 	        				    }
 	        				});
 	    	        	}else{

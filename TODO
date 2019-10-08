@@ -1,6 +1,9 @@
 Front end: (reservar.php)
 -Dont allow booking past start of hour [DONE] 
 -Fix first row bug [DONE]
--Dont allow 2 bookings at the same hour
--Fix weekly limit ignored
+-Fix weekly limit ignored [DONE]
+-Use CGF values instead of hardcoded limits for bookings [DONE]
 -New error messages for simultaneous book, maximum books and blocked user
+-Add langs
+-Auto confirm on booking room past starting hour
+-Dont allow 2 bookings at the same hour

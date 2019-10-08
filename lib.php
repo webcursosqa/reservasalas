@@ -92,11 +92,12 @@ function modulo_hora($unixtime, $factor = null){
 	}
 }
 
+//returns the daily and weekly bookings of the user
 function booking_availability($date){
 	global $DB,$USER,$CFG;
 	//format YYYY-MM-DD
 	$today = date('Y-m-d',time());
-	if( !$isbloked = $DB->get_record('reservasalas_bloqueados', array("alumno_id"=>$USER->id, 'estado'=>1))){
+	if(!$DB->get_record('reservasalas_bloqueados', array("alumno_id"=>$USER->id, 'estado'=>1))){
 		
 		$sqlWeekBookings = "SELECT *
 						FROM {reservasalas_reservas}
@@ -116,6 +117,27 @@ function booking_availability($date){
 		$books = array($CFG->reservasSemana,$CFG->reservasDia);
 	}
 	return $books;
+}
+
+function is_blocked($student) {
+	global $DB;
+
+	$table = 'reservasalas_bloqueados';
+	$conditions = array("alumno_id" => $student, "estado" => 1);
+	if($block = $DB->get_record($table, $conditions)) {
+		return $block->comentarios;
+	}
+	else {
+		return false;
+	} 
+}
+
+function block($user_id) {
+
+}
+
+function unblock($user_id) {
+	
 }
 
 function block_update_all() 
@@ -150,6 +172,8 @@ function block_update_all()
 	}
 }
 
+//update the block status of the user
+//returns either true (if blocked) or an array of the daily and weekly books
 function block_update($user_id)
 {
 	//we can do one of 3 things
@@ -157,7 +181,6 @@ function block_update($user_id)
 	//	-done when missed
 	//unblock user (remove record)
 	//	-3 days after block
-	//this last scenario can happen if a user misses twice or is blocked manually, etc
 	global $DB;
 
 	$currentTime = time();
@@ -169,6 +192,8 @@ function block_update($user_id)
 	$table = "reservasalas_bloqueados";
 	$conditions = array("alumno_id" => $user_id, "estado" => 1);
 	$block_exists = $DB->record_exists($table, $conditions);
+
+	$blocked = false;
 
 	//if currently unblocked
 	//check if needs to be blocked
@@ -202,7 +227,7 @@ function block_update($user_id)
 			$block->fecha_bloqueo = $book->fecha_reserva;
 			$block->id_reserva = $book->id;
 			$block->estado = 1;
-			$block->comentarios = "Default block by failure to confirm";
+			$block->comentarios = get_string("no-confirm", "local_reservasalas");
 			$block->alumno_id = $user_id;
 			$DB->insert_record("reservasalas_bloqueados", $block);
 		}
@@ -222,5 +247,9 @@ function block_update($user_id)
 			echo "Blocked more than 3 days ago, deleting record for user id $user_id <br>";
 			$DB->update_record($table, $block);
 		}
+	}
+
+	if($blocked) {
+		return true;
 	}
 }
