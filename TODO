@@ -1,0 +1,15 @@
+-[DONE] Dont allow booking past start of hour
+-[DONE] Fix first row bug
+-[DONE] Fix weekly limit ignored
+-[DONE] Use CGF values instead of hardcoded limits for bookings
+-[DONE] New error messages for simultaneous book, maximum books and blocked user
+-[DONE] Add langs
+-[DONE] Handle reloads with block function 
+-Allow admins to write comments on block
+    -Edit form
+    -Edit back end
+-Auto confirm on booking room past starting hour
+    -Allow booking past start of hour
+    -Auto confirm
+-Dont allow 2 bookings at the same hour
+-Make upgrade script to update all users and avoid a potential hang when going to admin interface?

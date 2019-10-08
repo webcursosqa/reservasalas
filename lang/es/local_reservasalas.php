@@ -351,4 +351,18 @@ $string['searchuser'] = "Filtrar por email de usuarios";
 $string['filter'] = "Filtrar";
 $string['nouser'] = "No se encontraron usuarios";
 $string['blocked'] = 'Bloqueado';
+
+//admin block
+$string['bloquear-comment'] = "Bloqueado por administrador";
+
+//default block reason for no confirm
+$string['no-confirm'] = "No confirmar";
+
+//reservar ui answers for failure
+$string['data-default-error'] = "No se pudo reservar la sala";
+$string['data-blocked-for-reason'] = "Bloqueado por: ";
+$string['data-max-daily-books'] = "Maximas reservas diarias";
+$string['data-max-weekly-books'] = "Maximas reservas semanales";
+$string['data-internal-error'] = "Error interno";
+$string['data-already-booked'] = "Sala ya esta reservada";
 ?>

@@ -97,15 +97,9 @@ if ($form_buscar->is_cancelled()) {
 				$fromform->fr ['frequency'] = 1;
 		}
 		
-		list($weekBookings,$todayBookings) = booking_availability($fromform->fecha);
+		block_update($USER->id);
 		
 		$moodleurl = $CFG->wwwroot . '/local/reservasalas/ajax/data.php';
-		
-		//Booking preferences for basic users
-		if ($CFG->reservasDia == null)
-			$CFG->reservasDia = 2;
-		if ($CFG->reservasSemana == null)
-			$CFG->reservasSemana = 6;
 		
 		//Javascript,CSS and DIV for GWT
 		?>
@@ -116,10 +110,6 @@ if ($form_buscar->is_cancelled()) {
 			initialDate = "<?php echo $fromform->fecha; ?>"
 			typeRoom= "<?php echo $fromform->roomstype; ?>"
 			campus = "<?php echo $fromform->SedeEdificio; ?>"
-			userDayReservations = "<?php echo $todayBookings; ?>"
-			userWeeklyBooking = "<?php echo $weekBookings; ?>"
-			maxDailyBookings = "<?php echo $CFG->reservasDia; ?>"
-			maxWeeklyBookings = "<?php echo $CFG->reservasSemana; ?>"	
 			size = "<?php echo $fromform->size; ?>"
  			endDate = "<?php echo $fromform->enddate; ?>"
  			selectDays = "<?php echo $days; ?>"
@@ -164,10 +154,30 @@ if ($form_buscar->is_cancelled()) {
 			    success: function (response) {
 				    var modulos = response.values.Modulos;
 				    var salas = response.values.Salas;
+
+					//var today = new Date();
+					//var date = today.getYear()+'/'+(today.getMonth()+1)+'/'+today.getDate();
+					
+					//var temp = new Date(date + " " + modulos[0].horaFin).getTime();
+					//console.log(temp);
+					//go over all horas inicio and add a zero if single digit
+					for (var i = 0; i < modulos.length; i++)
+					{
+						if(modulos[i].horaInicio.length === 4)
+						{
+							modulos[i].horaInicio = "0" + modulos[i].horaInicio;
+						}
+						if(modulos[i].horaFin.trim().length == 4)
+						{
+							modulos[i].horaFin = "0" + modulos[i].horaFin.trim();
+						}
+					}
+
 				  	//Today date
 				    var d = new Date(); 
 				  	//Format the date to get the hour and minutes.
 				    var date = addZero(d.getHours())+":"+addZero(d.getMinutes());
+
 				    //var to save the html content for the grid
 				    var content = "";
 				   	for (var i = 0; i <= salas.length; i++) {
@@ -197,7 +207,7 @@ if ($form_buscar->is_cancelled()) {
 				            //Last column
 				            else if (j === modulos) {
 					            //Check availability
-					            if(salas[i-1].disponibilidad[j-1].ocupada == 1 || date > modulos[j-1].horaFin && today === thisdate){
+					            if(salas[i-1].disponibilidad[j-1].ocupada == 1 || date > modulos[j-1].horaInicio && today === thisdate){
 					            	content += "<td class='alert-danger disabled'>";
 					            }else{
 			                    	content += "<td class='alert-success' data-toggle='modal' data-target='#myModal' id='"+modulos[j-1].id+salas[i-1].salaid+"' moduloid='" +modulos[j-1].id+"' modulo='" +modulos[j-1].name+"' sala='"+ salas[i-1].nombresala +"' salaid='"+ salas[i-1].salaid +"'>";
@@ -212,7 +222,7 @@ if ($form_buscar->is_cancelled()) {
 			                //Every other row x cloumn
 			                else {
 				                //Check availability
-			                	if(salas[i-1].disponibilidad[j-1].ocupada == 1 || date > modulos[j-1].horaFin && today === thisdate){
+			                	if(salas[i-1].disponibilidad[j-1].ocupada == 1 || date > modulos[j-1].horaInicio && today === thisdate){
 					            	content += "<td  class='alert-danger disabled'>";
 			                	}else{
 			                    	content += "<td class='alert-success' data-toggle='modal' data-target='#myModal' id='"+modulos[j-1].id+salas[i-1].salaid+"' moduloid='" +modulos[j-1].id+"' modulo='" +modulos[j-1].name+"' sala='"+ salas[i-1].nombresala +"' salaid='"+ salas[i-1].salaid +"'>";
@@ -283,21 +293,21 @@ if ($form_buscar->is_cancelled()) {
 	        		    			'event' : $('#nombreevento').val(),
 	    	    					'asistants' : $('#numeroparticipantes').val()
 	        				    	},
+									//check for success
 	        				    success: function (response) {
-	            				    console.log(response);
-	            				    //Check if successfully saved
-	            				    if(response.error.length > 0 && $('#buttonsRooms').attr('advOptions') == 0){
-	            				    	$('#message').addClass('alert alert-danger');
-	                				    $('#message').html("No puedes realizar más reservas.");
-	            				    }else{
+									if(response == "success") {
 	            				    	gridcell.removeClass('alert-success');
 	            				    	gridcell.addClass('alert-danger');
 	            				    	gridcell.removeAttr('data-toggle');
 	            				    	gridcell.removeAttr('data-target');
 	                				    $('#message').addClass('alert alert-success');
 	                				    $('#message').html("Reserva realizada correctamente.");
-	            				    }
-	            				    
+									}
+									else {
+	            				    	$('#message').addClass('alert alert-danger');
+										//work here for different error messahes
+	                				    $('#message').html(response);
+									}
 	        				    }
 	        				});
 	    	        	}else{
