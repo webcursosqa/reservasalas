@@ -352,6 +352,9 @@ $string['filter'] = "Filter";
 $string['nouser'] = "No users were found";
 $string['blocked'] = 'Blocked';
 
+$string['userfilter'] = "User filter";
+$string['actions'] = "Actions";
+
 //admin block
 $string['bloquear-comment'] = "Blocked by administrator";
 

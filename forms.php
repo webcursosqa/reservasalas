@@ -1103,14 +1103,10 @@ class roomSearch extends moodleform  {
             		    'startyear' => date('Y')-2,
             		    'stopyear'  => date('Y')+2,
 						));
-        $mform->addElement('advcheckbox', 'more', '',get_string('userfilter','local_reservasalas'));
         
 		$mform->addElement('text', 'responsable', get_string('usercharge', 'local_reservasalas').': ');
 		$mform->setType('responsable', PARAM_TEXT);
 		$mform->setDefault('responsable', "user@alumnos.uai.cl");
-		
-		$mform->disabledIf('name', 'more', 'notchecked');
-		$mform->disabledIf('responsable', 'more', 'notchecked');
 		
 		$mform->addElement('header','notexpandedtwo', get_string('room','local_reservasalas'));
 		

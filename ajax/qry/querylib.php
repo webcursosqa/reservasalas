@@ -202,7 +202,8 @@ function reservasalas_sendMail($values, $errors, $user, $asistentes, $eventname,
 	    $message .= get_string("date", "local_reservasalas") . ": " . $day . " " . $error["fecha"] . " - "
 	        . get_string("room", "local_reservasalas") . ": " . $nombresala . " - "
 	            . get_string("module", "local_reservasalas") . ": " . $nombremodulo . " - "
-	                . "error. \n";
+					. "error. \n";
+					//tamper here to fix mail
 	} 
 	$messageconfirm = "\n Recuerda confirmar tu reserva, es posible desde 5 minutos antes y hasta 15 minutos después del comienzo del módulo. Se realiza en <a href='http://webcursos.uai.cl/local/reservasalas/misreservas.php'>Bloque UAI/Mis reservas.</a>";
 	$message.=$messageconfirm;
