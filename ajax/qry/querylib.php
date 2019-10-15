@@ -200,7 +200,7 @@ function reservasalas_sendMail($values, $errors, $user, $asistentes, $eventname,
 	    $nombremodulo = $DB->get_field('reservasalas_modulos','nombre_modulo',array("id"=>$error["modulo"]));
 	    //$nombresala = $DB->get_field('reservasalas_salas','nombre',array("id"=>$error["sala"]));
 	    $message .= get_string("date", "local_reservasalas") . ": " . $day . " " . $error["fecha"] . " - "
-	        . get_string("room", "local_reservasalas") . ": " . $nombresala . " - "
+	        //. get_string("room", "local_reservasalas") . ": " . $nombresala . " - "
 	            . get_string("module", "local_reservasalas") . ": " . $nombremodulo . " - "
 					. "error. \n";
 					//tamper here to fix mail
