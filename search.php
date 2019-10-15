@@ -123,7 +123,7 @@ if($action == "ver") {
     	}
     	
     	if($campus > 0){
-			var_dump($campus);
+			//var_dump($campus);
     	    // set the buildings ids ready for the query
     	    list ( $edificiosqlin, $edificioparams ) = $DB->get_in_or_equal ( $fromform->campus );
     	    
