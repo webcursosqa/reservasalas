@@ -1152,6 +1152,7 @@ class cambiarReserva extends moodleform{
 		
 		$info=json_encode($instance['x']);
 		$mform->addElement('select', 'campus', get_string('choose_buildings','local_reservasalas'),$sedeedificio);
+		$mform->setType('campis', PARAM_TEXT);
 		$mform->addElement('text', 'name', get_string('roomsname', 'local_reservasalas').': ');
 		$mform->setType('name', PARAM_TEXT);
 		$mform->addElement('hidden', 'info',$info);

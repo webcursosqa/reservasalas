@@ -88,7 +88,8 @@ if($action == "ver") {
         $enddate = $fromform->enddate;
 		$responsable = $fromform->responsable;
         $eventtype = $fromform->eventType;
-        $roomsname = $fromform->roomsname;
+		$roomsname = $fromform->roomsname;
+		$campus = $fromform->campus;
 	}
     if($startdate != null && $enddate != null){
         $params = Array();
@@ -122,6 +123,7 @@ if($action == "ver") {
     	}
     	
     	if($campus > 0){
+			var_dump($campus);
     	    // set the buildings ids ready for the query
     	    list ( $edificiosqlin, $edificioparams ) = $DB->get_in_or_equal ( $fromform->campus );
     	    
@@ -141,7 +143,6 @@ if($action == "ver") {
                 
                 $salasparam = array_merge($edificioparams,array($fromform->eventType,"%$fromform->roomsname%"));
                 $salas=$DB->get_fieldset_select('reservasalas_salas','id',$salasselect ,$salasparam);
-                
             }
             else if($eventtype && $roomsname!=null){
                 $salasselect = 'edificios_id '.$edificiosqlin.'
@@ -149,7 +150,6 @@ if($action == "ver") {
                 
                 $salasparam = array_merge($edificioparams,array("%$fromform->roomsname%"));
                 $salas=$DB->get_fieldset_select('reservasalas_salas','id',$salasselect ,$salasparam);
-                
             }
             
             if (!empty($salas)){
