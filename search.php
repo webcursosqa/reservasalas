@@ -113,7 +113,7 @@ if($action == "ver") {
 			);
 
     		if($users=$DB->get_fieldset_select("user",'id', $userselect, $userparams)) {
-				var_dump($users);
+				//var_dump($users);
 
 				list ( $usersqlin, $userparams ) = $DB->get_in_or_equal ( $users );
     		    $select.="AND alumno_id $usersqlin";
