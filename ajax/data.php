@@ -231,7 +231,9 @@ if ($action == "getbooking") {
 	}
 	$context = context_system::instance();
 	$PAGE->set_context($context);
-	reservasalas_sendMail($values, $error, $USER->id, $asistants, $event, $campusid);
+	if($response == "success") {
+		reservasalas_sendMail($values, $error, $USER->id, $asistants, $event, $campusid);
+	}
 
 	$jsonOutputs = $response;
 }

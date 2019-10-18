@@ -181,19 +181,19 @@ function reservasalas_sendMail($values, $errors, $user, $asistentes, $eventname,
 	$message .= get_string("event", "local_reservasalas") . ": " . $eventname . "\n";
 	$message .= get_string("assistants", "local_reservasalas") . ": " . $asistentes . "\n";
 	$message .= get_string("responsibility", "local_reservasalas") . ": " . $USER->firstname . " " . $USER->lastname . "\n";
-	$message .= get_string("rooms", "local_reservasalas") . ": \n";
 	
 	foreach ($values as $value) {
 		$stamp = strtotime($value["fecha"]);
 		$day = date("l", $stamp);
 		$nombremodulo = $DB->get_field('reservasalas_modulos','nombre_modulo',array("id"=>$value["modulo"]));
 		$nombresala = $DB->get_field('reservasalas_salas','nombre',array("id"=>$value["sala"]));
-		$message .= get_string("date", "local_reservasalas") . ": " . $day . " " . $value["fecha"] . " - " 
-		    . get_string("room", "local_reservasalas") . ": " . $nombresala . " - " 
-		        . get_string("module", "local_reservasalas") . ": " . $nombremodulo . " - " 
+		$message .= get_string("date", "local_reservasalas") . ": " . $day . " " . $value["fecha"] . "\n" 
+		    . get_string("room", "local_reservasalas") . ": " . $nombresala . "\n" 
+		        . get_string("module", "local_reservasalas") . ": " . $nombremodulo . "\n" 
                 . "ok. \n"
 				        ;
 	} 
+	/*
 	foreach ($errors as $error) {
 	    $stamp = strtotime($error["fecha"]);
 	    $day = date("l", $stamp);
@@ -203,8 +203,8 @@ function reservasalas_sendMail($values, $errors, $user, $asistentes, $eventname,
 	        //. get_string("room", "local_reservasalas") . ": " . $nombresala . " - "
 	            . get_string("module", "local_reservasalas") . ": " . $nombremodulo . " - "
 					. "error. \n";
-					//tamper here to fix mail
-	} 
+	}*/
+	
 	$messageconfirm = "\n Recuerda confirmar tu reserva, es posible desde 5 minutos antes y hasta 15 minutos después del comienzo del módulo. Se realiza en <a href='http://webcursos.uai.cl/local/reservasalas/misreservas.php'>Bloque UAI/Mis reservas.</a>";
 	$message.=$messageconfirm;
 	// Format each "\n" into a line break

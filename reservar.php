@@ -116,7 +116,6 @@ if ($form_buscar->is_cancelled()) {
  			weeklyFrequencyBookings = "<?php echo $fromform->fr['frequency']; ?>"
  			advOptions = "<?php echo $fromform->addmultiply; ?>" >
 		</div>
-		<div id="message"></div>
 		<div id="grids"></div>
 		
 		<script>
@@ -248,11 +247,12 @@ if ($form_buscar->is_cancelled()) {
 			        			content += "<div class='modal-body'></div>";
 			        			content += "<div class='modal-footer'></div>";
 			        				content += "<button type='button' id='confirmar' class='btn btn-primary'>Confirmar</button>";
-			        				content += "<button type='button' class='btn btn-default' data-dismiss='modal'>Cancelar</button>";
+			        				content += "<button type='button' class='btn btn-default' data-dismiss='modal'>Cerrar</button>";
 			        			content += "</div>";
 			        		content += "</div>";
 			        	content += "</div>";
 			        content += "</div>";
+
 			        //End modal content
 			        //Load content
 			        $("#grids").html(content);
@@ -260,6 +260,8 @@ if ($form_buscar->is_cancelled()) {
 			        	gridcell = $(this);
 					    //Save &(this) for code efficiency
 					    //Dinamically add content to modal
+						$("div.modal-header").attr("class", "modal-header bg-white text-black")
+						$("#confirmar").show();
 				        $("div.modal-body").html("¿Desea reservar la Sala:"+ $(this).attr('sala')+" para el modulo:" + $(this).attr('modulo') + 
 					        					"? <br><br>Nombre del evento:<input id=nombreevento type='text' name='member' value=''> "+
 					        					"<br><br>Numero de participantes(2-6):<select id='numeroparticipantes'>"+
@@ -275,7 +277,6 @@ if ($form_buscar->is_cancelled()) {
 					//Confirmation ajax
 	            	$("#confirmar").on("click", function() {
 	    	        	if($('#nombreevento').val() != ''){
-	    	        		$('#myModal').modal('hide');
 	        		    	$.ajax({
 	        				    type: 'GET',
 	        				    url: 'ajax/data.php',
@@ -295,18 +296,18 @@ if ($form_buscar->is_cancelled()) {
 	        				    	},
 									//check for success
 	        				    success: function (response) {
+									$("#confirmar").hide();
 									if(response == "success") {
-	            				    	gridcell.removeClass('alert-success');
+										gridcell.removeClass('alert-success');
 	            				    	gridcell.addClass('alert-danger');
 	            				    	gridcell.removeAttr('data-toggle');
 	            				    	gridcell.removeAttr('data-target');
-	                				    $('#message').addClass('alert alert-success');
-	                				    $('#message').html("Reserva realizada correctamente.");
+										$("div.modal-header").attr("class", "modal-header bg-success text-white")
+										$("div.modal-body").html("<p> Reserva realizada correctamente </p>");
 									}
 									else {
-	            				    	$('#message').addClass('alert alert-danger');
-										//work here for different error messahes
-	                				    $('#message').html(response);
+										$("div.modal-header").attr("class", "modal-header bg-danger text-white")
+										$("div.modal-body").html("<p>" + response + "</p>");
 									}
 	        				    }
 	        				});

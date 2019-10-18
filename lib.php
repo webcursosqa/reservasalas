@@ -119,7 +119,6 @@ function booking_availability($date){
 	return $books;
 }
 
-//not used for anything yet
 //returns success
 function block($student_id, $book_id, $reason) {
 	global $DB;
@@ -208,7 +207,7 @@ function block_update($user_id)
 	$currentTime = time();
 
 	$table = "reservasalas_reservas";
-	$conditions = array("alumno_id" => $user_id, "confirmado" => 0);
+	$conditions = array("alumno_id" => $user_id, "confirmado" => 0, "activa" => 1);
 	$books_exist = $DB->record_exists($table, $conditions);
 
 	$table = "reservasalas_bloqueados";
@@ -219,33 +218,58 @@ function block_update($user_id)
 
 	//if currently unblocked
 	//check if needs to be blocked
-	if ($books_exist and !$block_exists) 
+	if ($books_exist) 
 	{
 		$table = "reservasalas_reservas";
 		$conditions = array("alumno_id" => $user_id, "confirmado" => 0);
 		$sort = "fecha_reserva ASC";
 		$books = $DB->get_records($table, $conditions, $sort);
-		//the latest book
-		$book = end($books);
 
-		//get the time of the reserve
-		$module = $book->modulo;
-		$book_time = $DB->get_record("reservasalas_modulos", array("id" => $module));
+		$block = false;
+
+		/*
+		the idea here is to check from the oldest book to the newest book (active) and block only for the latest
+		while disabling all others in the way
+		*/
+
+		foreach ($books as $book) {
+			//get the time of the reserve
+			$module = $book->modulo;
+			$book_time = $DB->get_record("reservasalas_modulos", array("id" => $module));
 		
-		$time = $book_time->hora_inicio;
-		$date = $book->fecha_reserva;
+			$time = $book_time->hora_inicio;
+			$date = $book->fecha_reserva;
 
-		$unixtime = strtotime($date . " " . $time);
+			$unixtime = strtotime($date . " " . $time);
 
-		//if more than 15m since the book have passed (the book is not confirmed)
-		//and if less than 3d since the book
-		//and if there isnt a block already for that book
-		if (
-			$unixtime + (15 * 60) < $currentTime and
-			$unixtime + (3 * 24 * 60 * 60) > $currentTime and
-			!$DB->get_record("reservasalas_bloqueados", array("id_reserva" => $book->id))
-		) {
-			block($user_id, $book->id, get_string("no-confirm", "local_reservasalas"));
+			//if more than 15m since the book have passed (the book is not confirmed)
+			//disable 
+			//if less than 3d since the book
+			//and if there isnt a block already for that book
+			//then block and disable all other bookings
+			if ($unixtime + (15 * 60) < $currentTime and
+				$unixtime + (3 * 24 * 60 * 60) > $currentTime and
+				!$DB->get_record("reservasalas_bloqueados", array("id_reserva" => $book->id))
+			) {
+				//add block
+				$block = $book->id;
+			}
+		}
+
+		if($block) {
+			block($user_id, $block, get_string("no-confirm", "local_reservasalas"));
+			//if block then delete all reserves after that block
+			$afterBlock = false;
+			foreach ($books as $book) {
+				if($book->id == $block) {
+					$afterBlock = true;
+				}
+				if($afterBlock) {
+					//disable book and add
+					$book->activa = 0;
+					$DB->update_record("reservasalas_reservas", $book);
+				}
+			}
 		}
 	}
 	//unblock user, if user is blocked currently
@@ -260,12 +284,8 @@ function block_update($user_id)
 		//if 3 days have passed
 		if (strtotime($block_date) + (3 * 24 * 60 * 60) < $currentTime) {
 			$block->estado = 0;
-			echo "Blocked more than 3 days ago, deleting record for user id $user_id <br>";
+			//echo "Blocked more than 3 days ago, deleting record for user id $user_id <br>";
 			$DB->update_record($table, $block);
 		}
-	}
-
-	if($blocked) {
-		return true;
 	}
 }
