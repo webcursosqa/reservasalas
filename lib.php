@@ -166,10 +166,10 @@ function block_update_all()
 	global $DB;
 
 	//get all users currently blocked for unblocking
-	$users_blocked = $DB->get_records("reservasalas_bloqueados", array("estado" => 0));
+	$users_blocked = $DB->get_records("reservasalas_bloqueados", array("estado" => 1));
 
 	//get all non-confirmed books for blocking
-	$non_confirmed_books = $DB->get_records("reservasalas_reservas", array("confirmado" => 0));
+	$non_confirmed_books = $DB->get_records("reservasalas_reservas", array("confirmado" => 0, "activa" => 1));
 
 	$ids = array();
 
@@ -284,7 +284,6 @@ function block_update($user_id)
 		//if 3 days have passed
 		if (strtotime($block_date) + (3 * 24 * 60 * 60) < $currentTime) {
 			$block->estado = 0;
-			//echo "Blocked more than 3 days ago, deleting record for user id $user_id <br>";
 			$DB->update_record($table, $block);
 		}
 	}

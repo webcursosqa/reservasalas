@@ -1,10 +1,10 @@
 [DONE] Search: Make user filter do something
 [CANCELLED] Search: Add editing
-Bloquear: Allow admin to write message
 [DONE] ajax querylib: Mail may not show the booked rooms
 [DONE] stop sending mails when error
 [DONE] fix errors in blocking (delete all bookings when no-confirm)
 [DONE] make confirm or error a pop-up
-delete advanced search system
+[DONE] delete advanced search system
+[DONE] delete recurring bookings
+Bloquear: Allow admin to write message
 delete all error systems from Mail
-delete recurring bookings

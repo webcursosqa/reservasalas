@@ -38,28 +38,10 @@ function reservasalas_getModules($id) {
 	));
 	return $data;
 }
-function reservasalas_getBooking($type, $campusid, $date, $multiply, $size, $finaldate, $days, $frequency) {
+function reservasalas_getBooking($type, $campusid, $date) {
 	global $DB;
-	
-	if ($multiply == 1) {
-		
-		$times = reservasalas_daysCalculator($date, $finaldate, $days, $frequency);
-		$timesArray = array();
-		foreach ($times as $time) {
-			$timesArray [] = "'" . $time . "'";
-		}
-		$date = implode(",", $timesArray);
-		
-		if ($size != "0") {
-			$sizePieces = explode ("-", $size);
-			if ($sizePieces [1] == "+") {
-				$sizePieces [1] = 1000;
-			}
-			// $sqlCapacityFilter = "AND rs.capacidad BETWEEN $sizePieces[0] AND $sizePieces[1]";
-		}
-	} else {
-		$date = "'" . date ("Y-m-d", $date) . "'";
-	}
+
+	$date = "'" . date ("Y-m-d", $date) . "'";
 	
 	$sqlDisponibility = "SELECT salaid, salanombre, moduloid, modulonombre, moduloinicio, modulofin,capacidad , MAX(ocupada) as ocupada 
 	FROM (
