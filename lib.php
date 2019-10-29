@@ -258,14 +258,9 @@ function block_update($user_id)
 
 		if($block) {
 			block($user_id, $block, get_string("no-confirm", "local_reservasalas"));
-			//if block then delete all reserves after that block
-			$afterBlock = false;
+			//disable all books when blocking
 			foreach ($books as $book) {
-				if($book->id == $block) {
-					$afterBlock = true;
-				}
-				if($afterBlock) {
-					//disable book and add
+				if($book->activa == 1) {
 					$book->activa = 0;
 					$DB->update_record("reservasalas_reservas", $book);
 				}
