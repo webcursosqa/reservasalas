@@ -261,7 +261,8 @@ else if ($fromform = $form_buscar->get_data ()) {
 	            				    gridcell.addClass('alert-danger');
 	            				    gridcell.removeAttr('data-toggle');
 	            				    gridcell.removeAttr('data-target');
-									$("div.modal-header").attr("class", "modal-header bg-success text-white")
+									$("div.modal-header").attr("class", "modal-header bg-success text-white");
+									$("div.modal-title").attr("class", "text-white");
 									$("div.modal-body").html("<p> Reserva realizada correctamente </p>");
 								}
 								else {
