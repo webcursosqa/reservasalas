@@ -101,7 +101,7 @@ if($action == "ver") {
     	    $date,
     	    $endDate
     	);
-    	if($responsable != null or $responsable != "user@alumnos.uai.cl"){
+    	if($responsable != null or $responsable != "user@alumnos.uai.cl" or $responsable == "") {
     		// search by user email		
     		$userselect= $DB->sql_like('username', ':search1' , $casesensitive = false, $accentsensitive = false).'
                         OR '.$DB->sql_like('firstname', ':search2' , $casesensitive = false, $accentsensitive = false).'
