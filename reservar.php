@@ -267,6 +267,7 @@ else if ($fromform = $form_buscar->get_data ()) {
 								}
 								else {
 									$("div.modal-header").attr("class", "modal-header bg-danger text-white")
+									$("div.modal-title").attr("class", "text-white");
 									$("div.modal-body").html("<p>" + response + "</p>");
 								}
 	        				   }
