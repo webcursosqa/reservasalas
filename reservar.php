@@ -219,7 +219,8 @@ else if ($fromform = $form_buscar->get_data ()) {
 			        gridcell = $(this);
 					   //Save &(this) for code efficiency
 					   //Dinamically add content to modal
-					$("div.modal-header").attr("class", "modal-header bg-white text-black")
+					$("div.modal-header").attr("class", "modal-header bg-white text-black");
+					$("h4.modal-title").attr("class", "modal-title");
 					$("#confirmar").show();
 				       $("div.modal-body").html("¿Desea reservar la Sala:"+ $(this).attr('sala')+" para el modulo:" + $(this).attr('modulo') + 
 					        				"? <br><br>Nombre del evento:<input id=nombreevento type='text' name='member' value=''> "+
@@ -262,12 +263,12 @@ else if ($fromform = $form_buscar->get_data ()) {
 	            				    gridcell.removeAttr('data-toggle');
 	            				    gridcell.removeAttr('data-target');
 									$("div.modal-header").attr("class", "modal-header bg-success text-white");
-									$("div.modal-title").attr("class", "text-white");
+									$(".modal-title").attr("class", "modal-title text-white");
 									$("div.modal-body").html("<p> Reserva realizada correctamente </p>");
 								}
 								else {
 									$("div.modal-header").attr("class", "modal-header bg-danger text-white")
-									$("div.modal-title").attr("class", "text-white");
+									$("h4.modal-title").attr("class", "modal-title text-white");
 									$("div.modal-body").html("<p>" + response + "</p>");
 								}
 	        				   }
