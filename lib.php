@@ -169,13 +169,14 @@ function block_update_all()
 	$users_blocked = $DB->get_records("reservasalas_bloqueados", array("estado" => 1));
 
 	//get all non-confirmed books for blocking
-	//$non_confirmed_books = $DB->get_records("reservasalas_reservas", array("confirmado" => 0, "activa" => 1,));
+	//$non_confirmed_books = $DB->get_records("reservasalas_reservas", array("confirmado" => 0, "activa" => 1));
+
     $sqlnonconfirmedbooks = "SELECT *
 						FROM {reservasalas_reservas}
 						WHERE confirmado >= ?
 						AND activa = ?
-						AND DATEDIFF(CURDATE(), from_unixtime(r.fecha_creacion)) <= ?
-                        AND curdate() > r.fecha_reserva";
+						AND DATEDIFF(CURDATE(), from_unixtime(fecha_creacion)) <= ?
+                        AND curdate() > fecha_reserva";
     echo $sqlnonconfirmedbooks;
     $non_confirmed_books = $DB->get_records_sql($sqlnonconfirmedbooks, array(0, 1, 3));
 
