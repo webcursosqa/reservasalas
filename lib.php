@@ -176,7 +176,7 @@ function block_update_all()
 						AND activa = ?
 						AND DATEDIFF(CURDATE(), from_unixtime(r.fecha_creacion)) <= ?
                         AND curdate() > r.fecha_reserva";
-
+    echo $sqlnonconfirmedbooks;
     $non_confirmed_books = $DB->get_records_sql($sqlnonconfirmedbooks, array(0, 1, 3));
 
 
