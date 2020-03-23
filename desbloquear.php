@@ -38,8 +38,6 @@ if (isguestuser()){
 $action = optional_param("action", "view", PARAM_TEXT);
 $id = optional_param("id", 0, PARAM_INT);
 $search = optional_param("search", null, PARAM_TEXT);
-$page = optional_param('page', 0, PARAM_INT);
-$perpage = 30;
 $url = new moodle_url('/local/reservasalas/desbloquear.php'); 
 $context = context_system::instance();//context_system::instance();
 $PAGE->set_context($context);
@@ -80,22 +78,19 @@ if($action == 'unblock'){
     }
 }
 if($action == 'view'){
-    block_update_all();
-
     $form = new desbloquearAlumnoForm();
     if($data = $form->get_data()){
         $search = $data->search;
     }
     $like='';
-    $query = 'Select rb.id,u.username,u.firstname, u.lastname, rb.fecha_bloqueo 
+    $query = 'Select rb.id,u.username,u.firstname, u.lastname, rb.fecha_bloqueo, u.id as user_id
                 from {reservasalas_bloqueados} as rb 
                 inner join {user} as u on (u.id = rb.alumno_id) 
                 where estado = :estado 
                 AND ('.$DB->sql_like('username', ':search1' , $casesensitive = false, $accentsensitive = false, $notlike = false).' 
                 OR '.$DB->sql_like('firstname', ':search2' , $casesensitive = false, $accentsensitive = false, $notlike = false).'
                 OR '.$DB->sql_like('lastname', ':search3' , $casesensitive = false, $accentsensitive = false, $notlike = false).')';
-    if($bloqueados = $DB->get_records_sql($query, array("estado" => 1, "search1" => "%$search%","search2" => "%$search%","search3" => "%$search%"), $page * $perpage, $perpage)){
-        $countblock = count($bloqueados);
+    if($bloqueados = $DB->get_records_sql($query, array("estado" => 1, "search1" => "%$search%","search2" => "%$search%","search3" => "%$search%"), 0, 30)){
         $table = new html_table();
         $table->head = array(
             '#',
@@ -105,7 +100,8 @@ if($action == 'view'){
             get_string('email','local_reservasalas'),
             get_string('action','local_reservasalas')
         );
-        $counter = $page * $perpage + 1;
+
+        $counter = 1;
         foreach($bloqueados as $bloqueado){
             $table->data[] = array(
                 $counter,
@@ -115,12 +111,21 @@ if($action == 'view'){
                 $bloqueado->username,
                 $OUTPUT->single_button(new moodle_url($url, array('action'=>'unblock', 'id'=>$bloqueado->id)), get_string('unblock','local_reservasalas'))
             );
+
+            //instead of updating everyone only update the 30 people shown
+            //beware, if someone is actually updated it wont show on the table since its already loaded
+            block_update($bloqueado->user_id);
+
+            //list only the first 30
+            if($counter >= 30)
+            {
+                break;
+            }
+
             $counter++;
         }
         $dom = $form->display();
         $dom .= html_writer::table($table);
-        $dom .= $OUTPUT->paging_bar(round($countblock/$perpage), $page, $perpage,
-            $CFG->wwwroot . '/local/reservasalas/desbloquear.php?action=' . $action . '&search=' . $search . '&page=');
     }else{
         $dom = $form->display();
         $dom .= html_writer::div(get_string('noblocked','local_reservasalas'), 'alert alert-warning');

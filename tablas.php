@@ -268,9 +268,11 @@ class tablas{
 				get_string('building', 'local_reservasalas'), get_string('rooms', 'local_reservasalas'),
 				get_string('module', 'local_reservasalas'), get_string('confirm', 'local_reservasalas'),
 				get_string('cancel', 'local_reservasalas'));
-		$reservas = $DB->get_records('reservasalas_reservas', array('alumno_id' => $user_id, 'activa' => '1'));
+
+		//make it so the newest reservas are on top of the list
+		$reservas = $DB->get_records('reservasalas_reservas', array('alumno_id' => $user_id, 'activa' => '1'), 'id DESC');
+
 		foreach ($reservas as $reserva) {
-				
 			if($userid == null){
 				$con_url = new moodle_url('misreservas.php', array('action'=>'confirmar', 'idreserva'=>$reserva->id, 'sesskey'=>sesskey()));//('confirmar.php?idconfirmar='. $reserva->id);
 				$del_url = new moodle_url('misreservas.php', array('action'=>'cancelar', 'idreserva'=>$reserva->id, 'sesskey' =>sesskey()));

@@ -227,6 +227,7 @@ if($action == "ver") {
                             rs.nombre as sala,
                             u.firstname as firstname,
                             u.lastname as lastname,
+							u.id as userid,
                             rm.nombre_modulo as modulo
                             FROM {reservasalas_reservas} AS rr
                             INNER JOIN {reservasalas_salas} AS rs ON (rr.salas_id = rs.id)
@@ -236,7 +237,9 @@ if($action == "ver") {
                             INNER JOIN {reservasalas_modulos} as rm ON (rm.id = rr.modulo)
                             WHERE rr.id $sqlin";
     	    $data = $DB->get_records_sql($tableinfoquery,$tableinfoparams);
-    	    $url = new moodle_url('/local/reservasalas/search.php');
+			$url = new moodle_url('/local/reservasalas/search.php');
+			
+			//foreach all users drawing the table and updating their status
     	    foreach($data as $info){
     	        $table->data[] = array(
     	            $info->sede,
@@ -246,9 +249,12 @@ if($action == "ver") {
     	            $info->reserva,
     	            date("Y-m-d",$info->creacion),
     	            $info->firstname.' '.$info->lastname,
-    	            $info->modulo,
+					$info->modulo,
+
     	            $OUTPUT->single_button(new moodle_url($url, array('action'=>'remove','reservaid'=>$info->id)), get_string('remove','local_reservasalas'))
-    	        );
+				);
+				//update the user status
+				block_update($info->userid);
     	    }
     	    $table->size = array('8%', '8%','8%','23%','10%','10%','20%','5%','3%');
     	    echo html_writer::table($table);
