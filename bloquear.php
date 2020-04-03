@@ -41,8 +41,6 @@ if (isguestuser()){
 $action = optional_param("action", "view", PARAM_TEXT);
 $id = optional_param("id", 0, PARAM_INT);
 $search = optional_param("search", null, PARAM_TEXT);
-$page = optional_param('page', 0, PARAM_INT);
-$perpage = 30;
 
 $url = new moodle_url('/local/reservasalas/bloquear.php');
 $context = context_system::instance();//context_system::instance();
@@ -85,8 +83,6 @@ if($action == 'block'){
     }
 }
 if($action == 'view'){
-    block_update_all();
-
     //Formulario para bloquear a un alumno
     $form = new buscadorUsuario(null);
     $dom = $form->display();
@@ -101,7 +97,7 @@ if($action == 'view'){
                     OR '.$DB->sql_like('lastname', ':search3' , $casesensitive = false, $accentsensitive = false, $notlike = false).'
                     group by u.id';
         //Bloquea al usuario en la base de datos
-        if($usuarios = $DB->get_records_sql($query,array('search1'=>"%$search%", 'search2'=>"%$search%", 'search3'=>"%$search%"))){
+        if($usuarios = $DB->get_records_sql($query,array('search1'=>"%$search%", 'search2'=>"%$search%", 'search3'=>"%$search%"), 0, 30)){
             $countblock = count($usuarios);
             $table = new html_table();
             $table->head = array(
@@ -111,7 +107,7 @@ if($action == 'view'){
                 get_string('email','local_reservasalas'),
                 get_string('action','local_reservasalas')
             );
-            $counter = $page * $perpage + 1;
+            $counter = 1;
             foreach($usuarios as $usuario){
                 if($usuario->estado == 1){
                     $action = '<strike>'.get_string('blocked','local_reservasalas').'</strike>';
@@ -131,11 +127,21 @@ if($action == 'view'){
                     $username,
                     $action
                 );
+
+                
+                //instead of updating everyone only update the 30 people shown
+                //beware, if someone is actually updated it wont show on the table since its already loaded
+                block_update($usuario->id);
+
+                //show only first 30 people
+                if($counter >= 30)
+                {
+                    break;
+                }
+
                 $counter++;
             }
             $dom .= html_writer::table($table);
-            $dom .= $OUTPUT->paging_bar(round($countblock/$perpage), $page, $perpage,
-                $CFG->wwwroot . '/local/reservasalas/desbloquear.php?action=' . $action . '&search=' . $search . '&page=');
         }else{
             $dom .= html_writer::div(get_string('nouser','local_reservasalas'), 'alert alert-warning');
         }

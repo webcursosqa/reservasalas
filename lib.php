@@ -161,47 +161,6 @@ function is_blocked($student) {
 	} 
 }
 
-function block_update_all() 
-{
-	global $DB;
-
-	//get all users currently blocked for unblocking
-	$users_blocked = $DB->get_records("reservasalas_bloqueados", array("estado" => 1));
-
-	//get all non-confirmed books for blocking
-	//$non_confirmed_books = $DB->get_records("reservasalas_reservas", array("confirmado" => 0, "activa" => 1));
-
-    $sqlnonconfirmedbooks = "SELECT *
-						FROM {reservasalas_reservas}
-						WHERE confirmado >= ?
-						AND activa = ?
-						AND DATEDIFF(CURDATE(), from_unixtime(fecha_creacion)) <= ?
-                        AND curdate() > fecha_reserva";
-    $non_confirmed_books = $DB->get_records_sql($sqlnonconfirmedbooks, array(0, 1, 3));
-
-
-	$ids = array();
-
-	foreach ($users_blocked as $user_blocked) {
-		$id = $user_blocked->id;
-		if(!in_array($id, $ids)) {
-			$ids[] = $id;
-		}
-	}
-
-	foreach($non_confirmed_books as $non_confirmed_book) {
-		$id = $non_confirmed_book->alumno_id;
-		if(!in_array($id, $ids)) {
-			$ids[] = $id;
-		}
-	}
-
-	//check all ids
-	foreach($ids as $id) {
-		block_update($id);
-	}
-}
-
 //update the block status of the user
 //returns either true (if blocked) or an array of the daily and weekly books
 function block_update($user_id)
