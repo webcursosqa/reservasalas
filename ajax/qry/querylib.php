@@ -192,7 +192,7 @@ function reservasalas_sendMail($values, $errors, $user, $asistentes, $eventname,
 	// Format each "\n" into a line break
 	$formattedMessage = nl2br($message);
 	
-	$eventdata = new stdClass();
+	$eventdata = new core\message\message;
 	$eventdata->component = "local_reservasalas"; // your component name
 	$eventdata->name = "reservenotification"; // this is the message name from messages.php
 	$eventdata->userfrom = $userfrom;
